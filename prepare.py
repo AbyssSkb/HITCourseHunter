@@ -106,7 +106,6 @@ def get_coueses(category: dict[str, str], time_info: dict[str, str], keyword: st
                     }
                     for course in elements
                 ]
-                print(f"共找到{len(courses)}门课程。")
                 return courses
             except KeyError:
                 print(response_json["message"])
@@ -159,6 +158,9 @@ def main():
                     if len(courses) == 0:
                         print("未找到课程。")
                         continue
+                    else:
+                        print(f"共找到{len(courses)}门课程。")
+
                     for course in courses:
                         name = course["name"]
                         teacher = course["teacher"]
