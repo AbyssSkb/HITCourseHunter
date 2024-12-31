@@ -3,11 +3,11 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'  # 只在推送新标签时触发（例如 v1.0.0）
+      - 'v*'
 
 jobs:
   build:
-    runs-on: windows-latest  # 使用 Windows 环境
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'  # 选择你的 Python 版本
+        python-version: '3.10'
 
     - name: Install Nuitka and dependencies
       run: |
@@ -46,8 +46,8 @@ jobs:
         cp .env.example release/
 
     - name: Create a GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
-        files: release/*  # 发布文件
+        files: release/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
