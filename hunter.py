@@ -7,10 +7,10 @@ try:
     with open("courses.json", "r") as f:
         courses = json.load(f)
 except FileNotFoundError:
-    print("找不到文件：courses.json。请先运行prepare.py。")
+    print("找不到文件courses.json。请先运行prepare.py。")
     exit(1)
 
-config = dotenv_values()
+config = dotenv_values(".env")
 cookies = config.get("COOKIES")
 if cookies is None or cookies == "":
     cookies = get_cookies()

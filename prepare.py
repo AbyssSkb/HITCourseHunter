@@ -3,7 +3,7 @@ import os
 from dotenv import dotenv_values
 from tools import get_cookies, get_time_info, get_course_categories, get_coueses
 
-config = dotenv_values()
+config = dotenv_values(".env")
 cookies = config.get("COOKIES")
 if cookies is None or cookies == "":
     cookies = get_cookies()

@@ -5,7 +5,7 @@ import sys
 
 
 def get_cookies():
-    config = dotenv_values()
+    config = dotenv_values(".env")
     username = config.get("USERNAME")
     password = config.get("PASSWORD")
     path = config.get("PATH")
