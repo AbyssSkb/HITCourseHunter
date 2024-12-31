@@ -20,11 +20,15 @@ headers = {
     "Cookie": cookies,
 }
 
+unsucessful_courses = []
+
 
 def main():
     try:
         for course in courses:
-            add_course(course, headers)
+            status = add_course(course, headers)
+            if not status:
+                unsucessful_courses.append(course)
             print("等待3秒后继续...")
             print()
             time.sleep(3)
@@ -35,6 +39,9 @@ def main():
         with open(".env", mode="w") as f:
             for key, value in config.items():
                 f.write(f'{key}="{value}"\n')
+
+        with open("courses.json", "w") as f:
+            json.dump(unsucessful_courses, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":

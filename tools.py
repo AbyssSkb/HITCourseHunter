@@ -52,10 +52,6 @@ def get_time_info(headers: dict[str, str]):
                 current_term = response_json["p_dqxq"]
                 academic_year = response_json["p_xn"]
                 term = response_json["p_xq"]
-                # print(
-                #     f"Current academic year: {current_academic_year}, term: {current_term}"
-                # )
-                # print(f"Academic year: {academic_year}, term: {term}")
                 print("时间信息已获取。")
                 return {
                     "current_academic_year": current_academic_year,
@@ -108,7 +104,7 @@ def get_coueses(
     time_info: dict[str, str],
     headers: dict[str, str],
     keyword: str,
-):
+) -> list[dict[str, str]]:
     if keyword == "":
         print(f"正在获取`{category['name']}`类别下所有课程...")
     else:
@@ -130,7 +126,6 @@ def get_coueses(
             response_json: dict = response.json()
             try:
                 elements = response_json["kxrwList"]["list"]
-                # print(elements[0])
                 courses = [
                     {
                         "id": course["id"],
@@ -145,17 +140,15 @@ def get_coueses(
                 return courses
             except KeyError:
                 print(response_json["message"])
-                return []
         except ValueError:
             print("响应内容不是有效的JSON格式")
-            return []
     else:
         print(f"请求失败，状态码：{response.status_code}")
-        return []
+    return []
 
 
-def add_course(course: dict[str, str], headers: dict[str, str]):
-    print(f"正在课程选择：{course['name']}（{course['teacher']}）")
+def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
+    print(f"正在选择课程：{course['name']} ({course['teacher']}) ...")
     url = "http://jw.hitsz.edu.cn/Xsxk/addGouwuche"
     data = {
         "p_xktjz": "rwtjzyx",
@@ -168,7 +161,12 @@ def add_course(course: dict[str, str], headers: dict[str, str]):
     if response.status_code == 200:
         if "application/json" in response.headers["Content-Type"]:
             response_json = response.json()
-            print("响应内容：", response_json["message"])
+            message = response_json["message"]
+            if message == "操作成功":
+                print("选课成功")
+                return True
+            else:
+                print(f"选课失败：{message}")
         elif "text/html" in response.headers["Content-Type"]:
             print("Cookie过期，请重新登录")
             headers["Cookie"] = get_cookies()
@@ -177,4 +175,4 @@ def add_course(course: dict[str, str], headers: dict[str, str]):
             print("响应内容不是有效的JSON格式")
     else:
         print(f"请求失败，状态码：{response.status_code}")
-    return response.status_code
+    return False
