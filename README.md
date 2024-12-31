@@ -7,7 +7,12 @@
 
 ## 📚 使用说明
 
-### 1. 配置环境
+### 1. 下载程序
+1. 前往 [Release页面](https://github.com/AbyssSkb/HITCourseHunter/releases)
+2. 下载最新版本的 `hitcoursehunter.zip`
+3. 解压到任意目录
+
+### 2. 配置环境
 重命名 `.env.example` 为 `.env`，修改以下配置信息：
 ```ini
 USERNAME="你的统一身份认证用户名"
@@ -28,7 +33,7 @@ PATH="你的Edge/Chrome浏览器可执行文件路径"
 - `C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe`
 - `C:/Program Files/Google/Chrome/Application/chrome.exe`
 
-### 2. 运行程序
+### 3. 运行程序
 1. 先运行 `prepare.exe`
    - 按提示选择你想要抢的课程
 

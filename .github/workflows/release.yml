@@ -45,9 +45,13 @@ jobs:
         cp README.md release/
         cp .env.example release/
 
+    - name: Create a compressed archive (Windows)
+      run: |
+        Compress-Archive -Path release/* -DestinationPath hitcoursehunter.zip -Force
+
     - name: Create a GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        files: release/*
+        files: hitcoursehunter.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
