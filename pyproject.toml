@@ -5,6 +5,12 @@ description = "A course selection assistant tool for HITSZ"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "drissionpage>=4.1.0.15",
     "python-dotenv>=1.0.1",
     "requests>=2.32.3",
+]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.11.1",
 ]

@@ -12,3 +12,6 @@ wheels/
 
 *.json
 *.env
+*.spec
+*.exe
+*.pdf
