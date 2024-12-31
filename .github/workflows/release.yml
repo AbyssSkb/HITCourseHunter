@@ -25,17 +25,17 @@ jobs:
 
     - name: Compile prepare.py to binary
       uses: Nuitka/Nuitka-Action@main
-        with:
-          nuitka-version: main
-          script-name: prepare.py
-          mode: app
+      with:
+        nuitka-version: main
+        script-name: prepare.py
+        mode: app
 
     - name: Compile hunter.py to binary
       uses: Nuitka/Nuitka-Action@main
-        with:
-          nuitka-version: main
-          script-name: hunter.py
-          mode: app
+      with:
+        nuitka-version: main
+        script-name: hunter.py
+        mode: app
 
     - name: Create release directory
       run: |
