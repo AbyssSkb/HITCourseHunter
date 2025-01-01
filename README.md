@@ -10,7 +10,7 @@
 ### 1. 下载程序
 1. 前往 [Release页面](https://github.com/AbyssSkb/HITCourseHunter/releases)
 2. 下载最新版本的 `hitcoursehunter.zip`
-3. 解压到任意目录
+3. 解压到任意目录 (可能需要加入防火墙白名单)
 
 ### 2. 配置环境
 重命名 `.env.example` 为 `.env`，修改以下配置信息：
