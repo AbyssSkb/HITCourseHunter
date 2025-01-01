@@ -8,6 +8,8 @@ def get_cookies():
     config = dotenv_values(".env")
     username = config.get("USERNAME")
     password = config.get("PASSWORD")
+    headless = config.get("HEADLESS")
+    headless = True if headless is None else headless.lower() == "true"
     path = config.get("PATH")
     if username is None or password is None:
         print("请在.env文件中填写用户名和密码。")
@@ -18,8 +20,10 @@ def get_cookies():
         sys.exit(1)
 
     co = ChromiumOptions().set_browser_path(path)
+    co.headless(headless)
     print("正在获取Cookies...")
-    tab = Chromium(co).latest_tab
+    browser = Chromium(co)
+    tab = browser.latest_tab
     tab.get(
         "https://ids.hit.edu.cn/authserver/login?service=http%3A%2F%2Fjw.hitsz.edu.cn%2FcasLogin"
     )
@@ -35,8 +39,10 @@ def get_cookies():
     ele.focus()
     ele.click()
     tab.wait.load_start()
+    cookies = tab.cookies().as_str()
     print("登录成功，Cookies已获取。")
-    return tab.cookies().as_str()
+    browser.quit()
+    return cookies
 
 
 def get_time_info(headers: dict[str, str]):

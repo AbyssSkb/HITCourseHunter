@@ -18,6 +18,7 @@
 USERNAME="你的统一身份认证用户名"
 PASSWORD="你的统一身份认证密码"
 PATH="你的Edge/Chrome浏览器可执行文件路径"
+HEADLESS="True"  # 是否启用无头模式，True表示不显示浏览器窗口，False表示显示浏览器窗口
 ```
 
 #### 如何获取浏览器可执行文件路径
