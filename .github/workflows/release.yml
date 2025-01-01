@@ -42,7 +42,7 @@ jobs:
         script-name: hunter.py
         mode: app
 
-    - name: 
+    - name: Transform README.md to PDF
       run: |
         npm i -g md-to-pdf
         md-to-pdf README.md
