@@ -1,5 +1,7 @@
 # 🎯 HITSZ 抢课助手
 
+[![Build and Release](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/release.yml/badge.svg)](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/release.yml)
+
 ## ⚠️ 注意事项
 - 自用
 - 具有时效性，不保证能用
