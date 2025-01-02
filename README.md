@@ -64,10 +64,6 @@ HEADLESS="True"  # 是否启用无头模式，True表示不显示浏览器窗口
    - Windows: 通常在 `C:\Program Files\Google\Chrome\Application\chrome.exe`
    - 也可以右键Chrome快捷方式 -> 属性 -> 目标，复制路径
 
-注意：路径中的反斜杠需要写成双反斜杠或正斜杠，例如：
-- `C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe`
-- `C:/Program Files/Google/Chrome/Application/chrome.exe`
-
 ## 🛠️ 实现原理
 - `prepare.exe`
   - 获取课程信息
