@@ -6,9 +6,10 @@ import json
 import time
 from datetime import datetime
 import os
+from typing import Optional
 
 
-def load_existing_courses():
+def load_existing_courses() -> list[dict[str, str]]:
     """加载已选择的课程列表
 
     从courses.json文件中读取之前已选择的课程信息。
@@ -23,7 +24,7 @@ def load_existing_courses():
     return []
 
 
-def display_categories(categories):
+def display_categories(categories: list[dict[str, str]]):
     """显示可选课程类别列表
 
     将课程类别以编号+名称的形式打印到控制台。
@@ -35,7 +36,9 @@ def display_categories(categories):
         print(f"{i+1}. {category['name']}")
 
 
-def handle_course_selection(courses: list[dict[str, str]], selected_courses: list[dict[str, str]]):
+def handle_course_selection(
+    courses: list[dict[str, str]], selected_courses: list[dict[str, str]]
+) -> bool:
     """处理用户的课程选择过程
 
     遍历课程列表，让用户对每门课程进行选择：
@@ -66,7 +69,7 @@ def handle_course_selection(courses: list[dict[str, str]], selected_courses: lis
     return False
 
 
-def validate_time_format(time_str):
+def validate_time_format(time_str: str) -> bool:
     """验证时间字符串格式
 
     检查时间字符串是否符合HH:MM:SS格式。
@@ -84,7 +87,7 @@ def validate_time_format(time_str):
         return False
 
 
-def load_config():
+def load_config() -> dict[str, str]:
     """加载和验证配置信息
 
     从.env文件中加载配置信息，包括Cookie和开始时间等关键参数。
@@ -114,7 +117,7 @@ def load_config():
     return config
 
 
-def load_courses():
+def load_courses() -> list[dict[str, str]]:
     """加载待选课程列表
 
     从courses.json文件加载待选课程信息。
@@ -137,7 +140,7 @@ def load_courses():
         raise FileNotFoundError("找不到文件courses.json。请先运行prepare.py。")
 
 
-def get_headers(cookies):
+def get_headers(cookies: str) -> dict[str, str]:
     """生成HTTP请求头
 
     根据提供的Cookie构造用于HTTP请求的headers字典。
@@ -212,7 +215,7 @@ def wait_until_start(start_time):
     print("\n开始抢课！")
 
 
-def get_cookies():
+def get_cookies() -> str:
     """获取新的登录Cookie
 
     通过模拟登录过程获取有效的Cookie。
@@ -275,7 +278,7 @@ def get_cookies():
     return cookies
 
 
-def get_time_info(headers: dict[str, str]):
+def get_time_info(headers: dict[str, str]) -> dict[str, str]:
     """获取当前学年学期信息
 
     Args:
@@ -319,7 +322,9 @@ def get_time_info(headers: dict[str, str]):
         print(f"请求失败，状态码：{response.status_code}")
 
 
-def get_course_categories(time_info: dict[str, str], headers: dict[str, str]):
+def get_course_categories(
+    time_info: dict[str, str], headers: dict[str, str]
+) -> list[dict[str, str]]:
     """获取课程类别列表
 
     Args:
@@ -354,6 +359,7 @@ def get_course_categories(time_info: dict[str, str], headers: dict[str, str]):
             print("响应内容不是有效的JSON格式")
     else:
         print(f"请求失败，状态码：{response.status_code}")
+    return []
 
 
 def get_coueses(
