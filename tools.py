@@ -6,7 +6,6 @@ import json
 import time
 from datetime import datetime
 import os
-from typing import Optional
 
 
 def load_existing_courses() -> list[dict[str, str]]:
