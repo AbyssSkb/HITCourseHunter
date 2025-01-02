@@ -35,7 +35,7 @@ def display_categories(categories):
         print(f"{i+1}. {category['name']}")
 
 
-def handle_course_selection(courses, selected_courses):
+def handle_course_selection(courses: list[dict[str, str]], selected_courses: list[dict[str, str]]):
     """处理用户的课程选择过程
 
     遍历课程列表，让用户对每门课程进行选择：
@@ -393,12 +393,12 @@ def get_coueses(
         try:
             response_json: dict = response.json()
             try:
-                elements = response_json["kxrwList"]["list"]
+                elements: list[dict[str, str]] = response_json["kxrwList"]["list"]
                 courses = [
                     {
                         "id": course["id"],
-                        "name": course["kcmc"] + course["tyxmmc"].strip(),
-                        "teacher": course["dgjsmc"],
+                        "name": course["kcmc"].strip() + course["tyxmmc"].strip(),
+                        "teacher": course["dgjsmc"].strip(),
                         "code": category["code"],
                         "academic_year": time_info["academic_year"],
                         "term": time_info["term"],
