@@ -47,22 +47,12 @@
    ```
 
 ### ⚙️ 配置说明
-重命名 `.env.example` 为 `.env`，修改以下配置信息：
+重命名 `.env.example` 为 `.env`，填入你的统一身份认证用户名和密码。
+> 注意是从深圳校区页面登录的密码而不是从本部页面登录的密码
 ```ini
 USERNAME="你的统一身份认证用户名"
 PASSWORD="你的统一身份认证密码"
-PATH="C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"  # 你的Edge/Chrome浏览器可执行文件路径
-HEADLESS="True"  # 是否启用无头模式，True表示不显示浏览器窗口，False表示显示浏览器窗口
 ```
-
-#### 🔍 如何获取浏览器可执行文件路径
-1. Edge浏览器
-   - Windows: 通常在 `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`
-   - 也可以右键Edge快捷方式 -> 属性 -> 目标，复制路径
-
-2. Chrome浏览器
-   - Windows: 通常在 `C:\Program Files\Google\Chrome\Application\chrome.exe`
-   - 也可以右键Chrome快捷方式 -> 属性 -> 目标，复制路径
 
 ## 🛠️ 实现原理
 - `prepare.exe`
@@ -72,9 +62,6 @@ HEADLESS="True"  # 是否启用无头模式，True表示不显示浏览器窗口
 - `hunter.exe`
   - 读取 `courses.json` 中的课程信息
   - 按照3秒间隔持续发送选课请求
-- 技术栈:
-  - [DrissionPage](https://www.drissionpage.cn/): 模拟浏览器登录教务系统，获取Cookie
-  - [Requests](https://docs.python-requests.org/en/latest/index.html): 与教务系统API交互
 - 接口说明:
   - 获取学期信息: `/Xsxk/queryXkdqXnxq`
   - 获取课程类别: `/Xsxk/queryYxkc`

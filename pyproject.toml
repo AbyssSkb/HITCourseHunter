@@ -5,7 +5,7 @@ description = "A course selection assistant tool for HITSZ"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "drissionpage>=4.1.0.15",
+    "beautifulsoup4>=4.12.3",
     "python-dotenv>=1.0.1",
     "requests>=2.32.3",
 ]

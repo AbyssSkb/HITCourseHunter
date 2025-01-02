@@ -1,47 +1,58 @@
 import requests
-from DrissionPage import Chromium, ChromiumOptions
 from dotenv import dotenv_values
 import sys
+from bs4 import BeautifulSoup
 
 
 def get_cookies():
     config = dotenv_values(".env")
     username = config.get("USERNAME")
     password = config.get("PASSWORD")
-    headless = config.get("HEADLESS")
-    headless = True if headless is None else headless.lower() == "true"
-    path = config.get("PATH")
     if username is None or password is None:
         print("请在.env文件中填写用户名和密码。")
         sys.exit(1)
 
-    if path is None:
-        print("请在.env文件中填写浏览器路径。")
-        sys.exit(1)
-
-    co = ChromiumOptions().set_browser_path(path)
-    co.headless(headless)
-    print("正在获取Cookies...")
-    browser = Chromium(co)
-    tab = browser.latest_tab
-    tab.get(
-        "https://ids.hit.edu.cn/authserver/login?service=http%3A%2F%2Fjw.hitsz.edu.cn%2FcasLogin"
+    session = requests.Session()
+    session.headers.update(
+        {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+        }
     )
-    ele = tab.ele("#username")
-    ele.focus()
-    ele.input(username, by_js=True)
 
-    ele = tab.ele("#password")
-    ele.focus()
-    ele.input(password, by_js=True)
+    params = {
+        "type": "IDSUnion",
+        "appId": "ff2dfca3a2a2448e9026a8c6e38fa52b",
+        "success": "http://jw.hitsz.edu.cn/casLogin",
+    }
+    response = session.get(
+        "https://ids.hit.edu.cn/authserver/combinedLogin.do", params=params
+    )
+    soup = BeautifulSoup(response.text, "html.parser")
 
-    ele = tab.ele("#login_submit")
-    ele.focus()
-    ele.click()
-    tab.wait.load_start()
-    cookies = tab.cookies().as_str()
-    print("登录成功，Cookies已获取。")
-    browser.quit()
+    form = soup.select_one("#authZForm")
+    url = "https://sso.hitsz.edu.cn:7002" + form["action"]
+    client_id = soup.select_one("input[name=client_id]")["value"]
+    scope = soup.select_one("input[name=scope]")["value"]
+    state = soup.select_one("input[name=state]")["value"]
+    data = {
+        "action": "authorize",
+        "response_type": "code",
+        "redirect_uri": "https://ids.hit.edu.cn/authserver/callback",
+        "client_id": client_id,
+        "scope": scope,
+        "state": state,
+        "username": username,
+        "password": password,
+    }
+
+    response = session.post(url, data=data)
+    cookies = "; ".join(
+        [
+            f"{cookie.name}={cookie.value}"
+            for cookie in session.cookies
+            if "jw.hitsz.edu.cn" in cookie.domain
+        ]
+    )
     return cookies
 
 
