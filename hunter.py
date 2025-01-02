@@ -2,13 +2,18 @@ import json
 import time
 from dotenv import dotenv_values
 from tools import get_cookies, add_course
+import sys
 
 try:
     with open("courses.json", "r") as f:
         courses = json.load(f)
+
+    if len(courses) == 0:
+        print("没有要抢的课程")
+        sys.exit(1)
 except FileNotFoundError:
     print("找不到文件courses.json。请先运行prepare.py。")
-    exit(1)
+    sys.exit(1)
 
 config = dotenv_values(".env")
 cookies = config.get("COOKIES")
