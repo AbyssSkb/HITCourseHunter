@@ -10,10 +10,10 @@ import os
 
 def load_existing_courses():
     """加载已选择的课程列表
-    
+
     从courses.json文件中读取之前已选择的课程信息。
     如果文件不存在，则返回空列表。
-    
+
     Returns:
         list[dict]: 包含课程信息的列表，每个课程为一个字典
     """
@@ -25,9 +25,9 @@ def load_existing_courses():
 
 def display_categories(categories):
     """显示可选课程类别列表
-    
+
     将课程类别以编号+名称的形式打印到控制台。
-    
+
     Args:
         categories (list[dict]): 课程类别列表，每个类别包含name字段
     """
@@ -37,16 +37,16 @@ def display_categories(categories):
 
 def handle_course_selection(courses, selected_courses):
     """处理用户的课程选择过程
-    
+
     遍历课程列表，让用户对每门课程进行选择：
     - y: 添加到选课列表
     - n: 跳过当前课程
     - q: 退出选课过程
-    
+
     Args:
         courses (list[dict]): 可选课程列表
         selected_courses (list[dict]): 已选课程列表
-    
+
     Returns:
         bool: 如果用户选择退出返回True，否则返回False
     """
@@ -68,12 +68,12 @@ def handle_course_selection(courses, selected_courses):
 
 def validate_time_format(time_str):
     """验证时间字符串格式
-    
+
     检查时间字符串是否符合HH:MM:SS格式。
-    
+
     Args:
         time_str (str): 要验证的时间字符串
-    
+
     Returns:
         bool: 时间格式正确返回True，否则返回False
     """
@@ -86,17 +86,17 @@ def validate_time_format(time_str):
 
 def load_config():
     """加载和验证配置信息
-    
+
     从.env文件中加载配置信息，包括Cookie和开始时间等关键参数。
     如果Cookie不存在或为空，会自动调用get_cookies()获取新的Cookie。
     会对START_TIME的格式进行验证，确保其符合HH:MM:SS格式。
-    
+
     Returns:
         dict: 包含以下配置项的字典:
             - COOKIES: 用于身份验证的Cookie字符串
             - START_TIME: 开始抢课的时间（格式：HH:MM:SS）
             - 其他在.env文件中定义的配置项
-    
+
     Raises:
         ValueError: 当START_TIME的格式不符合HH:MM:SS规范时抛出
     """
@@ -116,12 +116,12 @@ def load_config():
 
 def load_courses():
     """加载待选课程列表
-    
+
     从courses.json文件加载待选课程信息。
-    
+
     Returns:
         list[dict]: 待选课程列表
-    
+
     Raises:
         FileNotFoundError: 当courses.json文件不存在时抛出
         ValueError: 当没有待选课程时抛出
@@ -139,13 +139,13 @@ def load_courses():
 
 def get_headers(cookies):
     """生成HTTP请求头
-    
+
     根据提供的Cookie构造用于HTTP请求的headers字典。
     使用预设的User-Agent确保请求行为与浏览器一致。
-    
+
     Args:
         cookies (str): 用于身份验证的Cookie字符串
-    
+
     Returns:
         dict: 包含以下键值的请求头字典:
             - User-Agent: 浏览器标识字符串
@@ -159,10 +159,10 @@ def get_headers(cookies):
 
 def save_results(config, headers, courses):
     """保存更新后的配置和课程信息
-    
+
     将最新的Cookie保存回配置文件，并将课程信息更新到JSON文件中。
     这样可以在程序重启后保持登录状态和课程选择状态。
-    
+
     Args:
         config (dict): 配置信息字典
         headers (dict): 包含Cookie的请求头字典
@@ -179,11 +179,11 @@ def save_results(config, headers, courses):
 
 def wait_until_start(start_time):
     """倒计时等待至指定时间
-    
+
     实现精确的定时等待功能，直到达到指定的开始时间。
     会显示倒计时信息，每0.1秒更新一次。
     如果当前时间已经超过目标时间，则立即开始执行。
-    
+
     Args:
         start_time (str): 目标开始时间，格式为"HH:MM:SS"
     """
@@ -214,13 +214,13 @@ def wait_until_start(start_time):
 
 def get_cookies():
     """获取新的登录Cookie
-    
+
     通过模拟登录过程获取有效的Cookie。
     使用.env文件中配置的用户名和密码进行统一身份认证。
-    
+
     Returns:
         str: 包含所有必要认证信息的Cookie字符串
-    
+
     Raises:
         SystemExit: 当.env中未配置用户名或密码时退出程序
     """
@@ -277,10 +277,10 @@ def get_cookies():
 
 def get_time_info(headers: dict[str, str]):
     """获取当前学年学期信息
-    
+
     Args:
         headers: HTTP请求头字典
-    
+
     Returns:
         dict: 包含以下键值的字典:
             - current_academic_year: 当前学年
@@ -321,11 +321,11 @@ def get_time_info(headers: dict[str, str]):
 
 def get_course_categories(time_info: dict[str, str], headers: dict[str, str]):
     """获取课程类别列表
-    
+
     Args:
         time_info: 学年学期信息字典
         headers: HTTP请求头字典
-    
+
     Returns:
         list: 课程类别列表，每个类别是包含code和name的字典
     """
@@ -363,13 +363,13 @@ def get_coueses(
     keyword: str,
 ) -> list[dict[str, str]]:
     """根据类别和关键词获取课程列表
-    
+
     Args:
         category: 课程类别字典
         time_info: 学年学期信息字典
         headers: HTTP请求头字典
         keyword: 搜索关键词
-    
+
     Returns:
         list: 课程列表，每个课程是包含id、name、teacher等信息的字典
     """
@@ -417,11 +417,11 @@ def get_coueses(
 
 def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
     """添加课程到购物车
-    
+
     Args:
         course: 课程信息字典
         headers: HTTP请求头字典
-    
+
     Returns:
         bool: 是否添加成功
     """
