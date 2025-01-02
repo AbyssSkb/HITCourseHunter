@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -23,7 +22,7 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Install Nuitka and dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
@@ -55,13 +54,29 @@ jobs:
         cp README.pdf release/
         cp .env.example release/
 
-    - name: Create a compressed archive (Windows)
+    - name: Create a compressed archive
       run: |
         Compress-Archive -Path release/* -DestinationPath hitcoursehunter.zip -Force
 
-    - name: Create a GitHub Release
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-artifacts
+        path: hitcoursehunter.zip
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: release-artifacts
+
+    - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         files: hitcoursehunter.zip
+        draft: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
