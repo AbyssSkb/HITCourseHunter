@@ -19,7 +19,6 @@ def run_course_hunter(courses, headers):
         if not status:
             unsuccessful_courses.append(course)
         print("等待3秒后继续...")
-        print()
         time.sleep(3)
     return unsuccessful_courses
 

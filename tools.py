@@ -59,8 +59,8 @@ def handle_course_selection(
     print(f"共找到{len(courses)}门课程。")
     for course in courses:
         name = course["name"]
-        teacher = course["teacher"]
-        opt = input(f"是否添加课程 {name} ({teacher})? (y/n/q): ")
+        information = course["information"]
+        opt = input(f"\n课程名称：{name}\n{information}\n是否选择该课程？(y/n/q) : ")
         if opt == "y":
             selected_courses.append(course)
         elif opt == "q":
@@ -399,17 +399,20 @@ def get_coueses(
             response_json: dict = response.json()
             try:
                 elements: list[dict[str, str]] = response_json["kxrwList"]["list"]
-                courses = [
-                    {
-                        "id": course["id"],
-                        "name": course["kcmc"].strip() + course["tyxmmc"].strip(),
-                        "teacher": course["dgjsmc"].strip(),
-                        "code": category["code"],
-                        "academic_year": time_info["academic_year"],
-                        "term": time_info["term"],
-                    }
-                    for course in elements
-                ]
+                courses = []
+                for course in elements:
+                    soup = BeautifulSoup(course["kcxx"], "html.parser")
+                    information = soup.get_text("\n")
+                    courses.append(
+                        {
+                            "id": course["id"],
+                            "name": course["kcmc"].strip() + course["tyxmmc"].strip(),
+                            "information": information.strip(),
+                            "code": category["code"],
+                            "academic_year": time_info["academic_year"],
+                            "term": time_info["term"],
+                        }
+                    )
                 return courses
             except KeyError:
                 print(response_json["message"])
@@ -430,7 +433,9 @@ def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
     Returns:
         bool: 是否添加成功
     """
-    print(f"正在选择课程：{course['name']} ({course['teacher']}) ...")
+    name = course["name"]
+    information = course["information"]
+    print(f"\n正在添加课程：{name}\n{information}")
     url = "http://jw.hitsz.edu.cn/Xsxk/addGouwuche"
     data = {
         "p_xktjz": "rwtjzyx",
