@@ -6,6 +6,9 @@ import json
 import time
 from datetime import datetime
 import os
+from colorama import init, Fore
+
+init()  # 初始化colorama
 
 
 def load_existing_courses() -> list[dict[str, str]]:
@@ -32,7 +35,7 @@ def display_categories(categories: list[dict[str, str]]):
         categories (list[dict]): 课程类别列表，每个类别包含name字段
     """
     for i, category in enumerate(categories):
-        print(f"{i+1}. {category['name']}")
+        print(Fore.CYAN + f"{i+1}. {category['name']}" + Fore.RESET)
 
 
 def handle_course_selection(
@@ -53,16 +56,18 @@ def handle_course_selection(
         bool: 如果用户选择退出返回True，否则返回False
     """
     if len(courses) == 0:
-        print("未找到课程。")
+        print(Fore.YELLOW + "未找到课程。" + Fore.RESET)
         return False
 
-    print(f"共找到{len(courses)}门课程。")
+    print(Fore.CYAN + f"共找到{len(courses)}门课程。" + Fore.RESET)
     for course in courses:
         name = course["name"]
         information = course["information"]
-        opt = input(f"\n课程名称：{name}\n{information}\n是否选择该课程？(y/n/q) : ")
+        print(Fore.CYAN + f"\n课程名称：{name}\n{information}" + Fore.RESET)
+        opt = input(Fore.GREEN + "是否选择该课程？(y/n/q) : " + Fore.RESET)
         if opt == "y":
             selected_courses.append(course)
+            print(Fore.GREEN + "已添加到选课列表" + Fore.RESET)
         elif opt == "q":
             return True
     return False
@@ -201,17 +206,17 @@ def wait_until_start(start_time):
     time_delta = (target_time - now).total_seconds()
 
     if time_delta < 0:
-        print("目标时间已过，直接开始抢课！")
+        print(Fore.YELLOW + "目标时间已过，直接开始抢课！" + Fore.RESET)
         return
 
     while True:
         remaining = (target_time - datetime.now()).total_seconds()
         if remaining <= 0:
             break
-        print(f"\r距离开始还有 {int(remaining)} 秒...", end="", flush=True)
+        print(Fore.CYAN + f"\r距离开始还有 {int(remaining)} 秒..." + Fore.RESET, end="", flush=True)
         time.sleep(0.1)
 
-    print("\n开始抢课！")
+    print(Fore.GREEN + "\n开始抢课！" + Fore.RESET)
 
 
 def get_cookies() -> str:
@@ -230,7 +235,7 @@ def get_cookies() -> str:
     username = config.get("USERNAME")
     password = config.get("PASSWORD")
     if username is None or password is None:
-        print("请在.env文件中填写用户名和密码。")
+        print(Fore.RED + "请在.env文件中填写用户名和密码。" + Fore.RESET)
         sys.exit(1)
 
     session = requests.Session()
@@ -290,7 +295,7 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
             - academic_year: 选课学年
             - term: 选课学期
     """
-    print("正在获取时间信息...")
+    print(Fore.CYAN + "正在获取时间信息..." + Fore.RESET)
     url = "http://jw.hitsz.edu.cn/Xsxk/queryXkdqXnxq"
     data = {"mxpylx": "1"}
     response = requests.post(url, headers=headers, data=data)
@@ -302,7 +307,7 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
                 current_term = response_json["p_dqxq"]
                 academic_year = response_json["p_xn"]
                 term = response_json["p_xq"]
-                print("时间信息已获取。")
+                print(Fore.GREEN + "时间信息已获取。" + Fore.RESET)
                 return {
                     "current_academic_year": current_academic_year,
                     "current_term": current_term,
@@ -312,13 +317,13 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
             except KeyError:
                 print(response_json)
         elif "text/html" in response.headers["Content-Type"]:
-            print("Cookie过期，请重新登录")
+            print(Fore.YELLOW + "Cookie过期，请重新登录" + Fore.RESET)
             headers["Cookie"] = get_cookies()
             return get_time_info(headers)
         else:
-            print("响应内容不是有效的JSON格式")
+            print(Fore.RED + "响应内容不是有效的JSON格式" + Fore.RESET)
     else:
-        print(f"请求失败，状态码：{response.status_code}")
+        print(Fore.RED + f"请求失败，状态码：{response.status_code}" + Fore.RESET)
 
 
 def get_course_categories(
@@ -333,7 +338,7 @@ def get_course_categories(
     Returns:
         list: 课程类别列表，每个类别是包含code和name的字典
     """
-    print("正在获取课程类别...")
+    print(Fore.CYAN + "正在获取课程类别..." + Fore.RESET)
     url = "http://jw.hitsz.edu.cn/Xsxk/queryYxkc"
     data = {
         "p_xn": time_info["academic_year"],
@@ -350,14 +355,14 @@ def get_course_categories(
                 name = element["xkfsmc"]
                 categories.append({"code": code, "name": name})
 
-            print("课程类别已获取。")
+            print(Fore.GREEN + "课程类别已获取。" + Fore.RESET)
             return categories
         elif "text/html" in response.headers["Content-Type"]:
-            print("Cookie过期，请重新登录")
+            print(Fore.YELLOW + "Cookie过期，请重新登录" + Fore.RESET)
         else:
-            print("响应内容不是有效的JSON格式")
+            print(Fore.RED + "响应内容不是有效的JSON格式" + Fore.RESET)
     else:
-        print(f"请求失败，状态码：{response.status_code}")
+        print(Fore.RED + f"请求失败，状态码：{response.status_code}" + Fore.RESET)
     return []
 
 
@@ -379,9 +384,9 @@ def get_coueses(
         list: 课程列表，每个课程是包含id、name、teacher等信息的字典
     """
     if keyword == "":
-        print(f"正在获取`{category['name']}`类别下所有课程...")
+        print(Fore.CYAN + f"正在获取`{category['name']}`类别下所有课程..." + Fore.RESET)
     else:
-        print(f"正在获取`{category['name']}`类别下关键词为`{keyword}`的课程...")
+        print(Fore.CYAN + f"正在获取`{category['name']}`类别下关键词为`{keyword}`的课程..." + Fore.RESET)
     url = "http://jw.hitsz.edu.cn/Xsxk/queryKxrw"
     data = {
         "p_pylx": "1",
@@ -419,7 +424,7 @@ def get_coueses(
         except ValueError:
             print("响应内容不是有效的JSON格式")
     else:
-        print(f"请求失败，状态码：{response.status_code}")
+        print(Fore.RED + f"请求失败，状态码：{response.status_code}" + Fore.RESET)
     return []
 
 
@@ -435,7 +440,7 @@ def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
     """
     name = course["name"]
     information = course["information"]
-    print(f"\n正在添加课程：{name}\n{information}")
+    print(Fore.CYAN + f"\n正在添加课程：{name}\n{information}" + Fore.RESET)
     url = "http://jw.hitsz.edu.cn/Xsxk/addGouwuche"
     data = {
         "p_xktjz": "rwtjzyx",
@@ -450,16 +455,16 @@ def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
             response_json = response.json()
             message = response_json["message"]
             if message == "操作成功":
-                print("选课成功")
+                print(Fore.GREEN + "选课成功" + Fore.RESET)
                 return True
             else:
-                print(f"选课失败：{message}")
+                print(Fore.RED + f"选课失败：{message}" + Fore.RESET)
         elif "text/html" in response.headers["Content-Type"]:
-            print("Cookie过期，请重新登录")
+            print(Fore.YELLOW + "Cookie过期，请重新登录" + Fore.RESET)
             headers["Cookie"] = get_cookies()
             return add_course(course, headers)
         else:
-            print("响应内容不是有效的JSON格式")
+            print(Fore.RED + "响应内容不是有效的JSON格式" + Fore.RESET)
     else:
-        print(f"请求失败，状态码：{response.status_code}")
+        print(Fore.RED + f"请求失败，状态码：{response.status_code}" + Fore.RESET)
     return False
