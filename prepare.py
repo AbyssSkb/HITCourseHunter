@@ -31,6 +31,7 @@ from colorama import init, Fore
 
 init()  # 初始化colorama
 
+
 def run_course_preparation(categories, time_info, headers, selected_courses):
     """执行课程准备流程"""
     while True:
@@ -43,7 +44,9 @@ def run_course_preparation(categories, time_info, headers, selected_courses):
             selected_category = categories[opt - 1]
             while True:
                 keyword = input(
-                    Fore.GREEN + "输入你想查找的课程的关键词 (q 退出，直接回车查找全部) : " + Fore.RESET
+                    Fore.GREEN
+                    + "输入你想查找的课程的关键词 (q 退出，直接回车查找全部) : "
+                    + Fore.RESET
                 )
                 if keyword == "q":
                     break

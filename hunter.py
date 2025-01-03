@@ -33,6 +33,7 @@ from tools import (
 
 init()  # 初始化colorama
 
+
 def run_course_hunter(courses, headers):
     """执行选课流程
 
@@ -51,8 +52,10 @@ def run_course_hunter(courses, headers):
         status = add_course(course, headers)
         if not status:
             unsuccessful_courses.append(course)
-        print(Fore.CYAN + "等待3秒后继续..." + Fore.RESET)
-        time.sleep(3)
+        for i in range(3, 0, -1):
+            print(f"\r{Fore.CYAN}等待 {i} 秒后继续...{Fore.RESET}", end="")
+            time.sleep(1)
+        print("\r" + " " * 50 + "\r", end="")  # 清除倒计时行
     return unsuccessful_courses
 
 

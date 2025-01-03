@@ -213,10 +213,15 @@ def wait_until_start(start_time):
         remaining = (target_time - datetime.now()).total_seconds()
         if remaining <= 0:
             break
-        print(Fore.CYAN + f"\r距离开始还有 {int(remaining)} 秒..." + Fore.RESET, end="", flush=True)
+        print(
+            Fore.CYAN + f"\r距离开始还有 {int(remaining)} 秒..." + Fore.RESET,
+            end="",
+            flush=True,
+        )
         time.sleep(0.1)
 
-    print(Fore.GREEN + "\n开始抢课！" + Fore.RESET)
+    print("\r" + " " * 50 + "\r", end="")  # 清除倒计时行
+    print(Fore.GREEN + "开始抢课！" + Fore.RESET)
 
 
 def get_cookies() -> str:
@@ -404,7 +409,11 @@ def get_coueses(
     if keyword == "":
         print(Fore.CYAN + f"正在获取`{category['name']}`类别下所有课程..." + Fore.RESET)
     else:
-        print(Fore.CYAN + f"正在获取`{category['name']}`类别下关键词为`{keyword}`的课程..." + Fore.RESET)
+        print(
+            Fore.CYAN
+            + f"正在获取`{category['name']}`类别下关键词为`{keyword}`的课程..."
+            + Fore.RESET
+        )
     url = "http://jw.hitsz.edu.cn/Xsxk/queryKxrw"
     data = {
         "p_pylx": "1",
