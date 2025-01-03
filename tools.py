@@ -293,10 +293,10 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
 
     Returns:
         dict[str, str]: 包含以下信息的字典:
-            - current_academic_year: 当前学年
-            - current_term: 当前学期
-            - academic_year: 选课学年
-            - term: 选课学期
+            - current_academic_year: 当前学年，如"2023-2024"
+            - current_term: 当前学期，如"2"表示下学期
+            - academic_year: 选课学年，如"2023-2024"
+            - term: 选课学期，如"2"
 
     Raises:
         KeyError: 响应数据格式不符合预期时抛出
@@ -380,6 +380,9 @@ def get_coueses(
 ) -> list[dict[str, str]]:
     """根据类别和关键词搜索课程
 
+    获取指定类别下符合关键词的可选课程列表。
+    如果关键词为空字符串，则返回该类别下的所有课程。
+
     Args:
         category (dict[str, str]): 包含课程类别代码和名称的字典
         time_info (dict[str, str]): 学年学期信息字典
@@ -388,12 +391,15 @@ def get_coueses(
 
     Returns:
         list[dict[str, str]]: 课程列表，每个课程包含:
-            - id: 课程唯一标识
-            - name: 课程名称（包含体育项目名称）
-            - information: 课程详细信息
-            - code: 课程类别代码
-            - academic_year: 学年
-            - term: 学期
+            - id (str): 课程唯一标识
+            - name (str): 课程名称（包含体育项目名称）
+            - information (str): 课程详细信息（包括上课时间、地点、教师等）
+            - code (str): 课程类别代码
+            - academic_year (str): 学年
+            - term (str): 学期
+
+    Raises:
+        ValueError: 当服务器响应不是有效的JSON格式时抛出
     """
     if keyword == "":
         print(Fore.CYAN + f"正在获取`{category['name']}`类别下所有课程..." + Fore.RESET)
