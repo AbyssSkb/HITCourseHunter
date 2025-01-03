@@ -1,4 +1,9 @@
-"""HITSZ课程自动抢课程序"""
+"""HITSZ课程自动选课程序
+
+读取courses.json中的课程列表，在指定时间自动进行选课。
+支持设置开始时间，未设置则立即开始。
+选课失败的课程会重新保存到courses.json中。
+"""
 
 import time
 from colorama import init, Fore
@@ -14,7 +19,18 @@ from tools import (
 init()  # 初始化colorama
 
 def run_course_hunter(courses, headers):
-    """执行抢课流程"""
+    """执行选课流程
+
+    按顺序尝试选择courses中的每门课程，
+    每次选课之间有3秒的等待时间。
+
+    Args:
+        courses (list[dict]): 要选择的课程列表
+        headers (dict): 包含Cookie的HTTP请求头
+
+    Returns:
+        list[dict]: 选课失败的课程列表
+    """
     unsuccessful_courses = []
     for course in courses:
         status = add_course(course, headers)

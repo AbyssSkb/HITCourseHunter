@@ -283,17 +283,23 @@ def get_cookies() -> str:
 
 
 def get_time_info(headers: dict[str, str]) -> dict[str, str]:
-    """获取当前学年学期信息
+    """获取当前及选课学年学期信息
+
+    从教务系统获取当前的学年学期以及选课所属的学年学期信息。
+    如果Cookie过期会自动重新获取。
 
     Args:
-        headers: HTTP请求头字典
+        headers (dict[str, str]): 包含Cookie的HTTP请求头
 
     Returns:
-        dict: 包含以下键值的字典:
+        dict[str, str]: 包含以下信息的字典:
             - current_academic_year: 当前学年
             - current_term: 当前学期
             - academic_year: 选课学年
             - term: 选课学期
+
+    Raises:
+        KeyError: 响应数据格式不符合预期时抛出
     """
     print(Fore.CYAN + "正在获取时间信息..." + Fore.RESET)
     url = "http://jw.hitsz.edu.cn/Xsxk/queryXkdqXnxq"
@@ -372,16 +378,22 @@ def get_coueses(
     headers: dict[str, str],
     keyword: str,
 ) -> list[dict[str, str]]:
-    """根据类别和关键词获取课程列表
+    """根据类别和关键词搜索课程
 
     Args:
-        category: 课程类别字典
-        time_info: 学年学期信息字典
-        headers: HTTP请求头字典
-        keyword: 搜索关键词
+        category (dict[str, str]): 包含课程类别代码和名称的字典
+        time_info (dict[str, str]): 学年学期信息字典
+        headers (dict[str, str]): HTTP请求头字典
+        keyword (str): 搜索关键词，可以为空字符串
 
     Returns:
-        list: 课程列表，每个课程是包含id、name、teacher等信息的字典
+        list[dict[str, str]]: 课程列表，每个课程包含:
+            - id: 课程唯一标识
+            - name: 课程名称（包含体育项目名称）
+            - information: 课程详细信息
+            - code: 课程类别代码
+            - academic_year: 学年
+            - term: 学期
     """
     if keyword == "":
         print(Fore.CYAN + f"正在获取`{category['name']}`类别下所有课程..." + Fore.RESET)
@@ -429,14 +441,17 @@ def get_coueses(
 
 
 def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
-    """添加课程到购物车
+    """将课程添加到选课列表
+
+    尝试选择一门课程，如果Cookie过期会自动重新登录。
+    选课结果会通过控制台输出反馈。
 
     Args:
-        course: 课程信息字典
-        headers: HTTP请求头字典
+        course (dict[str, str]): 课程信息字典，包含id、name等字段
+        headers (dict[str, str]): 包含Cookie的HTTP请求头
 
     Returns:
-        bool: 是否添加成功
+        bool: 选课成功返回True，失败返回False
     """
     name = course["name"]
     information = course["information"]

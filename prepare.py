@@ -1,4 +1,9 @@
-"""HITSZ课程选择准备程序"""
+"""HITSZ课程选课准备程序
+
+用于在正式选课前准备要选的课程列表。
+支持按类别浏览和关键词搜索课程，
+并将选中的课程保存到courses.json文件中供选课程序使用。
+"""
 
 from tools import (
     display_categories,
