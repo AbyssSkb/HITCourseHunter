@@ -63,7 +63,7 @@ START_TIME="13:00:00"  # 可选，计划开始时间，格式为 HH:MM:SS
 - `hunter.exe`
   - 读取 `courses.json` 中的课程信息
   - 在指定时间（若配置了START_TIME）开始自动抢课
-  - 如果某门课抢课失败，会保留在courses.json中供下次继续尝试
+  - 如果某门课抢课失败，会保留在 `courses.json` 中供下次继续尝试
   - 每次抢课间隔3秒以避免请求过于频繁
 - 接口说明:
   - 获取学期信息: `/Xsxk/queryXkdqXnxq`
