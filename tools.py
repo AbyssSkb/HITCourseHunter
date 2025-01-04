@@ -284,6 +284,7 @@ def get_cookies() -> str:
             if "jw.hitsz.edu.cn" in cookie.domain
         ]
     )
+    print(Fore.GREEN + "Cookie已获取。" + Fore.RESET)
     return cookies
 
 
@@ -326,9 +327,10 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
                     "term": term,
                 }
             except KeyError:
-                print(response_json)
+                message = response_json["message"]
+                print(Fore.RED + f"错误：{message}" + Fore.RESET)
         elif "text/html" in response.headers["Content-Type"]:
-            print(Fore.YELLOW + "Cookie过期，请重新登录" + Fore.RESET)
+            print(Fore.YELLOW + "Cookie已过期，尝试重新获取..." + Fore.RESET)
             headers["Cookie"] = get_cookies()
             return get_time_info(headers)
         else:
@@ -369,7 +371,9 @@ def get_course_categories(
             print(Fore.GREEN + "课程类别已获取。" + Fore.RESET)
             return categories
         elif "text/html" in response.headers["Content-Type"]:
-            print(Fore.YELLOW + "Cookie过期，请重新登录" + Fore.RESET)
+            print(Fore.YELLOW + "Cookie已过期，尝试重新获取..." + Fore.RESET)
+            headers["Cookie"] = get_cookies()
+            return get_course_categories(time_info, headers)
         else:
             print(Fore.RED + "响应内容不是有效的JSON格式" + Fore.RESET)
     else:
@@ -447,7 +451,8 @@ def get_coueses(
                     )
                 return courses
             except KeyError:
-                print(response_json["message"])
+                message = response_json["message"]
+                print(Fore.RED + f"错误：{message}" + Fore.RESET)
         except ValueError:
             print("响应内容不是有效的JSON格式")
     else:
@@ -490,7 +495,7 @@ def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
             else:
                 print(Fore.RED + f"选课失败：{message}" + Fore.RESET)
         elif "text/html" in response.headers["Content-Type"]:
-            print(Fore.YELLOW + "Cookie过期，请重新登录" + Fore.RESET)
+            print(Fore.YELLOW + "Cookie已过期，尝试重新获取..." + Fore.RESET)
             headers["Cookie"] = get_cookies()
             return add_course(course, headers)
         else:
