@@ -52,7 +52,7 @@ def run_course_hunter(courses, headers):
         status = add_course(course, headers)
         if not status:
             unsuccessful_courses.append(course)
-        for i in range(3, 0, -1):
+        for i in range(2, 0, -1):
             print(f"\r{Fore.CYAN}等待 {i} 秒后继续...{Fore.RESET}", end="")
             time.sleep(1)
         print("\r" + " " * 50 + "\r", end="")  # 清除倒计时行
