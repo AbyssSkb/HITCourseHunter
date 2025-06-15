@@ -89,7 +89,7 @@ def main():
         if courses:
             unsuccessful_courses = courses
     finally:
-        if config is not None and headers is not None:
+        if config and headers:
             save_results(config, headers, unsuccessful_courses)
 
 
