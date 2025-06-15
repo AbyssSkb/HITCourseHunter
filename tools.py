@@ -115,7 +115,7 @@ def load_config() -> dict[str, str]:
     if start_time and not validate_time_format(start_time):
         raise ValueError("时间格式不正确，请检查START_TIME的值（格式：HH:MM:SS）")
 
-    if cookies is None or cookies == "":
+    if not cookies:
         cookies = get_cookies()
         config["COOKIES"] = cookies
 
