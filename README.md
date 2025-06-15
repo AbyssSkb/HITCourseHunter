@@ -1,4 +1,4 @@
-# 🎯 HITSZ 抢课助手
+# 🎯 HITSZ 自动化选课脚本
 
 [![Build and Release](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/release.yml/badge.svg)](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/release.yml)
 
