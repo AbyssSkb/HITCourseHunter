@@ -1,25 +1,3 @@
-"""HITSZ课程自动选课程序
-
-从courses.json中读取预选课程列表，在指定时间自动进行选课。
-支持定时选课功能，如未在.env中设置START_TIME则立即开始选课。
-
-功能特点：
-- 支持定时开始选课
-- 自动处理Cookie过期问题
-- 选课失败自动重试
-- 可随时中断，未选上的课程会重新保存
-- 精确的定时功能，支持毫秒级等待
-
-配置要求：
-- courses.json：包含要选的课程信息
-- .env：包含登录凭证和可选的开始时间
-
-使用方法：
-1. 先运行prepare.py准备课程列表
-2. 在.env中可选设置START_TIME（格式：HH:MM:SS）
-3. 运行本程序等待自动选课
-"""
-
 import time
 import colorama
 from colorama import Fore
@@ -32,18 +10,17 @@ from tools import (
     save_results,
 )
 
-colorama.init()  # 初始化colorama
+colorama.init()  # 初始化 colorama
 
 
-def run_course_hunter(courses, headers):
+def run_course_hunter(
+    courses: list[dict[str, str]], headers: dict[str, str]
+) -> list[dict[str, str]]:
     """执行选课流程
 
-    按顺序尝试选择courses中的每门课程，
-    每次选课之间有3秒的等待时间。
-
     Args:
-        courses (list[dict]): 要选择的课程列表
-        headers (dict): 包含Cookie的HTTP请求头
+        courses (list[dict[str, str]]): 要选择的课程列表
+        headers (dict[str, str]): HTTP 请求头
 
     Returns:
         list[dict]: 选课失败的课程列表
