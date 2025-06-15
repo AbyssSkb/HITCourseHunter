@@ -21,7 +21,8 @@
 """
 
 import time
-from colorama import init, Fore
+import colorama
+from colorama import Fore
 from tools import (
     add_course,
     wait_until_start,
@@ -31,7 +32,7 @@ from tools import (
     save_results,
 )
 
-init()  # 初始化colorama
+colorama.init()  # 初始化colorama
 
 
 def run_course_hunter(courses, headers):
