@@ -25,7 +25,7 @@ def load_existing_courses() -> list[dict[str, str]]:
     return []
 
 
-def display_categories(categories: list[dict[str, str]]):
+def display_categories(categories: list[dict[str, str]]) -> None:
     """显示可选课程类别列表
 
     将课程类别打印到控制台。
@@ -267,7 +267,7 @@ def get_cookies() -> str:
     ele.click()
     tab.wait.load_start()
     cookies = tab.cookies().as_str()
-    print(Fore.GREEN + "Cookie已获取。" + Fore.RESET)
+    print(Fore.GREEN + "Cookie 已获取。" + Fore.RESET)
     browser.quit()
     return cookies
 
@@ -365,7 +365,7 @@ def get_course_categories(
     return []
 
 
-def get_coueses(
+def get_courses(
     category: dict[str, str],
     time_info: dict[str, str],
     headers: dict[str, str],

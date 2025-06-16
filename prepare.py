@@ -1,38 +1,26 @@
-"""HITSZ课程选课准备程序
-
-用于在正式选课前准备要选的课程列表。
-支持按类别浏览和关键词搜索课程，选中的课程会保存到courses.json文件中。
-程序会自动处理登录认证，支持Cookie过期自动重新获取。
-
-功能特点：
-- 支持按课程类别浏览
-- 支持关键词搜索课程
-- 交互式选课界面
-- 自动保存选课结果
-- 可中断后继续选课
-
-用法：
-直接运行该程序，按提示进行操作即可。选择的课程将保存到courses.json文件中，
-供hunter.py程序在选课时使用。
-"""
-
 from tools import (
     display_categories,
     get_headers,
     get_time_info,
     get_course_categories,
-    get_coueses,
+    get_courses,
     handle_course_selection,
     load_config,
     load_existing_courses,
     save_results,
 )
-from colorama import init, Fore
+import colorama
+from colorama import Fore
 
-init()  # 初始化colorama
+colorama.init()  # 初始化 colorama
 
 
-def run_course_preparation(categories, time_info, headers, selected_courses):
+def run_course_preparation(
+    categories: list[dict[str, str]],
+    time_info: dict[str, str],
+    headers: dict[str, str],
+    selected_courses: list[dict[str, str]],
+) -> None:
     """执行课程准备流程"""
     while True:
         display_categories(categories)
@@ -51,7 +39,7 @@ def run_course_preparation(categories, time_info, headers, selected_courses):
                 if keyword == "q":
                     break
 
-                courses = get_coueses(
+                courses = get_courses(
                     category=selected_category,
                     time_info=time_info,
                     headers=headers,
@@ -66,7 +54,7 @@ def run_course_preparation(categories, time_info, headers, selected_courses):
             continue
 
 
-def main():
+def main() -> None:
     """主函数：程序入口"""
     config = None
     headers = None
