@@ -26,15 +26,15 @@ def run_course_preparation(
     while True:
         display_categories(categories)
         try:
-            opt = int(input(Fore.GREEN + "选择一个类别 (0 退出) : " + Fore.RESET))
+            opt = int(input(Fore.WHITE + "选择一个类别 (0 退出程序) : " + Fore.RESET))
             if opt == 0:
                 break
 
             selected_category = categories[opt - 1]
             while True:
                 keyword = input(
-                    Fore.GREEN
-                    + "输入你想查找的课程的关键词 (q 退出，直接回车查找全部) : "
+                    Fore.WHITE
+                    + "输入你想查找的课程的关键词 (q 返回上一级，直接回车查找全部) : "
                     + Fore.RESET
                 )
                 if keyword == "q":

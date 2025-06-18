@@ -67,12 +67,12 @@ def handle_course_selection(
         print(Fore.YELLOW + "未找到课程。" + Fore.RESET)
         return False
 
-    print(Fore.CYAN + f"共找到{len(courses)}门课程。" + Fore.RESET)
+    print(Fore.GREEN + f"共找到 {len(courses)} 门课程。" + Fore.RESET)
     for course in courses:
         name = course["name"]
         information = course["information"]
         print(Fore.CYAN + f"\n课程名称：{name}\n{information}" + Fore.RESET)
-        opt = input(Fore.GREEN + "是否选择该课程？(y/n/q) : " + Fore.RESET)
+        opt = input(Fore.WHITE + "是否选择该课程？(y/n/q) : " + Fore.RESET)
         if opt == "y":
             selected_courses.append(course)
             print(Fore.GREEN + "已添加到选课列表" + Fore.RESET)
@@ -257,7 +257,7 @@ def get_cookies() -> str:
 
     co = ChromiumOptions().set_browser_path(path)
     co.headless(headless)
-    print("正在获取Cookies...")
+    print(Fore.CYAN + "正在获取 Cookies..." + Fore.RESET)
     browser = Chromium(co)
     tab = browser.latest_tab
     tab.get(
@@ -461,7 +461,7 @@ def get_courses(
                 message = response_json["message"]
                 print(Fore.RED + f"错误：{message}" + Fore.RESET)
         except ValueError:
-            print("响应内容不是有效的JSON格式")
+            print(Fore.RED + "响应内容不是有效的 JSON 格式" + Fore.RESET)
     else:
         print(Fore.RED + f"请求失败，状态码：{response.status_code}" + Fore.RESET)
     return []
@@ -508,7 +508,7 @@ def add_course(
             else:
                 print(Fore.RED + f"选课失败：{message}" + Fore.RESET)
         elif "text/html" in response.headers["Content-Type"]:
-            print(Fore.YELLOW + "Cookie已过期，尝试重新获取..." + Fore.RESET)
+            print(Fore.YELLOW + "Cookie 已过期，尝试重新获取..." + Fore.RESET)
 
             if retry_count >= MAX_RETRIES:
                 raise MaxRetriesExceededError(MAX_RETRIES)
@@ -516,7 +516,7 @@ def add_course(
             headers["Cookie"] = get_cookies()
             return add_course(course, headers)
         else:
-            print(Fore.RED + "响应内容不是有效的JSON格式" + Fore.RESET)
+            print(Fore.RED + "响应内容不是有效的 JSON 格式" + Fore.RESET)
     else:
         print(Fore.RED + f"请求失败，状态码：{response.status_code}" + Fore.RESET)
     return False
