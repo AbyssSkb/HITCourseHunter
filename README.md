@@ -9,7 +9,7 @@
 - 可能没有手抢的快（
 
 ## 📚 使用说明
->
+
 > 请确保你已安装 [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 1. 克隆仓库
@@ -20,15 +20,7 @@
 
 2. 修改配置文件
 
-   重命名 `.env.example` 为 `.env`，修改以下配置信息：
-
-   ```ini
-   USERNAME="你的统一身份认证用户名"
-   PASSWORD="你的统一身份认证密码"
-   PATH="C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"  # 你的 Edge/Chrome 浏览器可执行文件路径
-   HEADLESS="True"  # 是否启用无头模式，True 表示不显示浏览器窗口，False 表示显示浏览器窗口
-   START_TIME="13:00:00"  # 可选，计划开始时间，格式为 HH:MM:SS
-   ```
+   重命名 `.env.example` 为 `.env`，修改其中的配置信息
 
 3. 运行程序
 
@@ -60,4 +52,3 @@
   - 获取课程类别: `/Xsxk/queryYxkc`
   - 查询可选课程: `/Xsxk/queryKxrw`
   - 选课: `/Xsxk/addGouwuche`
-

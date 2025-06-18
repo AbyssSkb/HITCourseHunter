@@ -23,7 +23,7 @@ def run_course_hunter(
         headers (dict[str, str]): HTTP 请求头
 
     Returns:
-        list[dict]: 选课失败的课程列表
+        list[dict[str, str]]: 选课失败的课程列表
     """
     unsuccessful_courses = []
     for course in courses:
