@@ -12,6 +12,7 @@ from tools import (
 )
 
 colorama.init()  # 初始化 colorama
+MAX_UNSUCCESSFUL_COURSE_RETRIES = 2
 
 
 def run_course_hunter(
@@ -45,6 +46,7 @@ def main():
     headers = None
     unsuccessful_courses = []
     courses = None
+    retry_count = 0
 
     try:
         courses = load_courses()
@@ -59,7 +61,14 @@ def main():
         else:
             print(Fore.GREEN + "未设置开始时间，直接开始抢课！" + Fore.RESET)
 
-        unsuccessful_courses = run_course_hunter(courses, headers, wait_time)
+        while retry_count <= MAX_UNSUCCESSFUL_COURSE_RETRIES:
+            unsuccessful_courses = run_course_hunter(courses, headers, wait_time)
+
+            if not unsuccessful_courses:
+                return
+
+            courses = unsuccessful_courses
+            retry_count += 1
 
     except (FileNotFoundError, ValueError) as e:
         print(Fore.RED + f"错误: {str(e)}" + Fore.RESET)
