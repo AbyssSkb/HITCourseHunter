@@ -9,6 +9,15 @@ import os
 from colorama import Fore
 from DrissionPage import Chromium, ChromiumOptions
 
+MAX_RETRIES = 3
+
+
+class MaxRetriesExceededError(Exception):
+    """当重试次数超过允许的最大次数时抛出"""
+
+    def __init__(self, max_retries: int):
+        super().__init__(f"重试次数超过最大限制：{max_retries}")
+
 
 def load_existing_courses() -> list[dict[str, str]]:
     """加载已选择的课程列表
@@ -272,7 +281,7 @@ def get_cookies() -> str:
     return cookies
 
 
-def get_time_info(headers: dict[str, str]) -> dict[str, str]:
+def get_time_info(headers: dict[str, str], retry_count: int = 0) -> dict[str, str]:
     """获取当前及选课学年学期信息
 
     从教务系统获取当前的学年学期以及选课所属的学年学期信息。
@@ -280,6 +289,7 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
 
     Args:
         headers (dict[str, str]): 包含 Cookie 的 HTTP 请求头
+        retry_count (int): 当前重试次数
 
     Returns:
         dict[str, str]: 包含以下信息的字典:
@@ -290,6 +300,7 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
 
     Raises:
         KeyError: 响应数据格式不符合预期时抛出
+        MaxRetriesExceededError: 当重试次数超过最大限制时抛出
     """
     print(Fore.CYAN + "正在获取时间信息..." + Fore.RESET)
     url = "http://jw.hitsz.edu.cn/Xsxk/queryXkdqXnxq"
@@ -315,8 +326,12 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
                 print(Fore.RED + f"错误：{message}" + Fore.RESET)
         elif "text/html" in response.headers["Content-Type"]:
             print(Fore.YELLOW + "Cookie 已过期，尝试重新获取..." + Fore.RESET)
+
+            if retry_count >= MAX_RETRIES:
+                raise MaxRetriesExceededError(MAX_RETRIES)
+
             headers["Cookie"] = get_cookies()
-            return get_time_info(headers)
+            return get_time_info(headers, retry_count + 1)
         else:
             print(Fore.RED + "响应内容不是有效的 JSON 格式" + Fore.RESET)
     else:
@@ -324,16 +339,20 @@ def get_time_info(headers: dict[str, str]) -> dict[str, str]:
 
 
 def get_course_categories(
-    time_info: dict[str, str], headers: dict[str, str]
+    time_info: dict[str, str], headers: dict[str, str], retry_count: int = 0
 ) -> list[dict[str, str]]:
     """获取课程类别列表
 
     Args:
         time_info (dict[str, str]): 学年学期信息字典
         headers (dict[str, str]): HTTP 请求头字典
+        retry_count (int): 当前重试次数
 
     Returns:
         list[dict[str, str]]: 课程类别列表，每个元素是包含课程类别信息的字典
+
+    Raises:
+        MaxRetriesExceededError: 当重试次数超过最大限制时抛出
     """
     print(Fore.CYAN + "正在获取课程类别..." + Fore.RESET)
     url = "http://jw.hitsz.edu.cn/Xsxk/queryYxkc"
@@ -356,8 +375,12 @@ def get_course_categories(
             return categories
         elif "text/html" in response.headers["Content-Type"]:
             print(Fore.YELLOW + "Cookie 已过期，尝试重新获取..." + Fore.RESET)
+
+            if retry_count >= MAX_RETRIES:
+                raise MaxRetriesExceededError(MAX_RETRIES)
+
             headers["Cookie"] = get_cookies()
-            return get_course_categories(time_info, headers)
+            return get_course_categories(time_info, headers, retry_count + 1)
         else:
             print(Fore.RED + "响应内容不是有效的 JSON 格式" + Fore.RESET)
     else:
@@ -444,7 +467,9 @@ def get_courses(
     return []
 
 
-def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
+def add_course(
+    course: dict[str, str], headers: dict[str, str], retry_count: int = 0
+) -> bool:
     """将课程添加到选课列表
 
     尝试选择一门课程，如果 Cookie 过期会自动重新登录。
@@ -453,9 +478,13 @@ def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
     Args:
         course (dict[str, str]): 课程信息字典
         headers (dict[str, str]): 包含 Cookie 的 HTTP 请求头
+        retry_count (int): 当前重试次数
 
     Returns:
         bool: 选课成功返回 True，失败返回 False
+
+    Raises:
+        MaxRetriesExceededError: 当重试次数超过最大限制时抛出
     """
     name = course["name"]
     information = course["information"]
@@ -480,6 +509,10 @@ def add_course(course: dict[str, str], headers: dict[str, str]) -> bool:
                 print(Fore.RED + f"选课失败：{message}" + Fore.RESET)
         elif "text/html" in response.headers["Content-Type"]:
             print(Fore.YELLOW + "Cookie已过期，尝试重新获取..." + Fore.RESET)
+
+            if retry_count >= MAX_RETRIES:
+                raise MaxRetriesExceededError(MAX_RETRIES)
+
             headers["Cookie"] = get_cookies()
             return add_course(course, headers)
         else:

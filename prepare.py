@@ -1,4 +1,5 @@
 from tools import (
+    MaxRetriesExceededError,
     display_categories,
     get_headers,
     get_time_info,
@@ -79,6 +80,8 @@ def main() -> None:
 
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\n正在退出..." + Fore.RESET)
+    except MaxRetriesExceededError:
+        print(Fore.RED + "重复获取 Cookie 次数超过最大限制" + Fore.RESET)
     finally:
         if config is not None and headers is not None:
             save_results(config, headers, selected_courses)

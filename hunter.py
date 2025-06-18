@@ -2,6 +2,7 @@ import time
 import colorama
 from colorama import Fore
 from tools import (
+    MaxRetriesExceededError,
     add_course,
     wait_until_start,
     load_courses,
@@ -63,6 +64,8 @@ def main():
     except (FileNotFoundError, ValueError) as e:
         print(Fore.RED + f"错误: {str(e)}" + Fore.RESET)
         return
+    except MaxRetriesExceededError:
+        print(Fore.RED + "重复获取 Cookie 次数超过最大限制" + Fore.RESET)
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\n正在退出..." + Fore.RESET)
         if courses:
