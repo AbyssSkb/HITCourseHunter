@@ -67,7 +67,7 @@ def main() -> None:
         headers = get_headers(config["COOKIES"])
 
         time_info = get_time_info(headers)
-        if time_info is None:
+        if not time_info:
             print(Fore.RED + "获取时间信息失败。" + Fore.RESET)
             return
 

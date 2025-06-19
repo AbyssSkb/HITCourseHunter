@@ -336,6 +336,7 @@ def get_time_info(headers: dict[str, str], retry_count: int = 0) -> dict[str, st
             print(Fore.RED + "响应内容不是有效的 JSON 格式" + Fore.RESET)
     else:
         print(Fore.RED + f"请求失败，状态码：{response.status_code}" + Fore.RESET)
+    return {}
 
 
 def get_course_categories(
