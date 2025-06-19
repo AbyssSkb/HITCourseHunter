@@ -10,6 +10,6 @@ wheels/
 .venv
 .python-version
 
-*.json
+courses.json
 *.env
 *.pdf
