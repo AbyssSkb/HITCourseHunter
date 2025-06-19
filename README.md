@@ -1,6 +1,7 @@
 # 🎯 HITSZ 自动化选课脚本
 
 [![Build and Release](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/release.yml/badge.svg)](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/release.yml)
+[![CI](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/ci.yml/badge.svg)](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/ci.yml)
 
 ## ⚠️ 注意事项
 
@@ -35,20 +36,3 @@
 ### 🔍 如何获取浏览器可执行文件路径
 
 见[获取浏览器路径的方法](https://drissionpage.cn/get_start/before_start/#2%EF%B8%8F%E2%83%A3-%E8%AE%BE%E7%BD%AE%E8%B7%AF%E5%BE%84)
-
-## 🛠️ 实现原理
-
-- `prepare.py`
-  - 获取学期信息和课程类别
-  - 通过关键词搜索课程
-  - 将用户选择的课程保存到 `courses.json`
-- `hunter.py`
-  - 读取 `courses.json` 中的课程信息
-  - 在指定时间（若配置了START_TIME）开始自动抢课
-  - 如果某门课抢课失败，会保留在 `courses.json` 中供下次继续尝试
-  - 每次抢课间隔3秒以避免请求过于频繁
-- 接口说明:
-  - 获取学期信息: `/Xsxk/queryXkdqXnxq`
-  - 获取课程类别: `/Xsxk/queryYxkc`
-  - 查询可选课程: `/Xsxk/queryKxrw`
-  - 选课: `/Xsxk/addGouwuche`
