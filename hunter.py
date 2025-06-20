@@ -28,7 +28,7 @@ def run_course_hunter(
     Returns:
         list[dict[str, str]]: 选课失败的课程列表
     """
-    unsuccessful_courses = []
+    unsuccessful_courses: list[dict[str, str]] = []
     for course in courses:
         status = add_course(course, headers)
         if not status:
@@ -40,7 +40,7 @@ def run_course_hunter(
     return unsuccessful_courses
 
 
-def main():
+def main() -> None:
     """主函数：程序入口"""
     config = None
     headers = None

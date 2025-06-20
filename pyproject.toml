@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [tool.pyright]
-typeCheckingMode = "off"
+typeCheckingMode = "standard"
 
 [tool.mypy]
 disable_error_code = ["import-untyped", "import-not-found"]
