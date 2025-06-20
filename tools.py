@@ -1,3 +1,5 @@
+from DrissionPage._elements.chromium_element import ChromiumElement
+from DrissionPage._pages.mix_tab import MixTab
 import requests
 from dotenv import dotenv_values
 import sys
@@ -123,7 +125,8 @@ def load_config() -> dict[str, str]:
         cookies = get_cookies()
         config["COOKIES"] = cookies
 
-    return config
+    filtered_config = {k: v for k, v in config.items() if v is not None}
+    return filtered_config
 
 
 def load_courses() -> list[dict[str, str]]:
@@ -260,20 +263,30 @@ def get_cookies() -> str:
     print(Fore.CYAN + "正在获取 Cookies..." + Fore.RESET)
     browser = Chromium(co)
     tab = browser.latest_tab
+    if not isinstance(tab, MixTab):
+        raise TypeError("`tab` 不是 `MixTab` 类型。")
     tab.get(
         "https://ids.hit.edu.cn/authserver/login?service=http%3A%2F%2Fjw.hitsz.edu.cn%2FcasLogin"
     )
-    ele = tab.ele("#username")
-    ele.focus()
-    ele.input(username, by_js=True)
 
-    ele = tab.ele("#password")
-    ele.focus()
-    ele.input(password, by_js=True)
+    username_element = tab.ele("#username")
+    if not isinstance(username_element, ChromiumElement):
+        raise TypeError("`username_element` 不是 `ChromiumElement` 类型。")
+    username_element.focus()
+    username_element.input(username, by_js=True)
 
-    ele = tab.ele("#login_submit")
-    ele.focus()
-    ele.click()
+    passward_element = tab.ele("#password")
+    if not isinstance(passward_element, ChromiumElement):
+        raise TypeError("`passward_element` 不是 `ChromiumElement` 类型。")
+    passward_element.focus()
+    passward_element.input(password, by_js=True)
+
+    submit_element = tab.ele("#login_submit")
+    if not isinstance(submit_element, ChromiumElement):
+        raise TypeError("`submit_element` 不是 `ChromiumElement` 类型。")
+    submit_element.focus()
+    submit_element.click()
+
     tab.wait.load_start()
     cookies = tab.cookies().as_str()
     print(Fore.GREEN + "Cookie 已获取。" + Fore.RESET)
