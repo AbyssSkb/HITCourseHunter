@@ -12,8 +12,5 @@ dependencies = [
     "requests>=2.32.3",
 ]
 
-[tool.pyright]
-typeCheckingMode = "standard"
-
-[tool.mypy]
-disable_error_code = ["import-untyped", "import-not-found"]
+[dependency-groups]
+dev = ["pre-commit>=4.2.0", "pyright>=1.1.402", "ruff>=0.12.0"]
