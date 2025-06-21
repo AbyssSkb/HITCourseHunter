@@ -1,6 +1,7 @@
 # 🎯 HITSZ 自动化选课脚本
 
 [![CI](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/ci.yml/badge.svg)](https://github.com/AbyssSkb/HITCourseHunter/actions/workflows/ci.yml)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 ## ⚠️ 注意事项
 
