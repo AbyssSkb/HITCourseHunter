@@ -11,6 +11,7 @@
 
 ## 📚 使用说明
 
+> [!NOTE]
 > 请确保你已安装 [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 1. 克隆仓库
@@ -33,6 +34,5 @@
    uv run hunter.py
    ```
 
-### 🔍 如何获取浏览器可执行文件路径
-
-见[获取浏览器路径的方法](https://drissionpage.cn/get_start/before_start/#2%EF%B8%8F%E2%83%A3-%E8%AE%BE%E7%BD%AE%E8%B7%AF%E5%BE%84)
+> [!TIP]
+> [获取浏览器可执行文件路径的方法](https://drissionpage.cn/get_start/before_start/#2%EF%B8%8F%E2%83%A3-%E8%AE%BE%E7%BD%AE%E8%B7%AF%E5%BE%84)
