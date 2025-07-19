@@ -33,6 +33,3 @@
    # 再运行 hunter.py 开始抢课
    uv run hunter.py
    ```
-
-> [!TIP]
-> [获取浏览器可执行文件路径的方法](https://drissionpage.cn/get_start/before_start/#2%EF%B8%8F%E2%83%A3-%E8%AE%BE%E7%BD%AE%E8%B7%AF%E5%BE%84)
