@@ -1,17 +1,79 @@
-from DrissionPage._elements.chromium_element import ChromiumElement
-from DrissionPage._pages.mix_tab import MixTab
-import requests
-from dotenv import dotenv_values
-import sys
-from bs4 import BeautifulSoup
 import json
-import time
-from datetime import datetime
 import os
+import random
+import sys
+import time
+from base64 import b64encode
+from datetime import datetime
+
+import requests
 from colorama import Fore
-from DrissionPage import Chromium, ChromiumOptions
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+from dotenv import dotenv_values
+from selectolax.parser import HTMLParser
 
 MAX_RETRIES = 3
+AES_CHARS = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678"
+
+
+def random_string(length: int) -> str:
+    """生成指定长度的随机字符串
+
+    该函数通过从 AES_CHARS 中随机选择字符来创建字符串。
+
+    Args:
+        length (int): 需要生成的随机字符串长度
+
+    Returns:
+        str: 指定长度的随机字符串
+    """
+    return "".join(random.choice(AES_CHARS) for _ in range(length))
+
+
+def get_aes_string(data: str, key: str, iv: str) -> str:
+    """使用 AES CBC 模式和 PKCS7 填充加密数据
+
+    该函数对输入的明文数据使用 AES 算法进行加密，采用 CBC 工作模式和 PKCS7 填充方式，
+    最后将加密结果编码为 Base64 字符串以便于传输和存储。
+
+    Args:
+        data (str): 要加密的明文数据。
+        key (str): 加密密钥。
+        iv (str): 初始化向量 (IV)。
+
+    Returns:
+        str: Base64 编码的密文。
+    """
+    key_bytes = key.encode("utf-8")
+    iv_bytes = iv.encode("utf-8")
+    data_bytes = data.encode("utf-8")
+
+    cipher = AES.new(key_bytes, AES.MODE_CBC, iv_bytes)
+    padded_data = pad(data_bytes, AES.block_size, style="pkcs7")
+    encrypted_bytes = cipher.encrypt(padded_data)
+
+    return b64encode(encrypted_bytes).decode("utf-8")
+
+
+def encrypt_password(password: str, salt: str) -> str:
+    """使用 AES 加密密码
+
+    该函数通过添加随机前缀、结合盐值和初始化向量来加密密码。
+    主要用于确保密码在传输过程中的安全性。
+
+    Args:
+        password (str): 需要加密的密码明文
+        salt (str): 用于加密的盐值
+
+    Returns:
+        str: 经过 Base64 编码的加密密码
+    """
+    prefix_random = random_string(64)
+    combined_data = prefix_random + password
+    iv = random_string(16)
+    encrypted_result = get_aes_string(combined_data, salt, iv)
+    return encrypted_result
 
 
 class MaxRetriesExceededError(Exception):
@@ -233,65 +295,84 @@ def wait_until_start(start_time: str) -> None:
 
 
 def get_cookies() -> str:
-    """获取新的登录 Cookie
-
-    通过模拟登录过程获取有效的 Cookie。
-    使用 .env 文件中配置的用户名和密码进行统一身份认证。
-
-    Returns:
-        str: 包含所有必要认证信息的 Cookie 字符串
-
-    Raises:
-        SystemExit: 当 .env 中未配置用户名或密码时退出程序
-    """
     config = dotenv_values(".env")
     username = config.get("USERNAME")
     password = config.get("PASSWORD")
-    headless = config.get("HEADLESS")
-    headless = True if headless is None else headless.lower() == "true"
-    path = config.get("PATH")
     if username is None or password is None:
         print(Fore.RED + "请在 .env 文件中填写用户名和密码。" + Fore.RESET)
         sys.exit(1)
 
-    if path is None:
-        print(Fore.RED + "请在 .env 文件中填写浏览器路径。" + Fore.RESET)
-        sys.exit(1)
-
-    co = ChromiumOptions().set_browser_path(path)
-    co.headless(headless)
-    print(Fore.CYAN + "正在获取 Cookies..." + Fore.RESET)
-    browser = Chromium(co)
-    tab = browser.latest_tab
-    if not isinstance(tab, MixTab):
-        raise TypeError("`tab` 不是 `MixTab` 类型。")
-    tab.get(
-        "https://ids.hit.edu.cn/authserver/login?service=http%3A%2F%2Fjw.hitsz.edu.cn%2FcasLogin"
+    session = requests.Session()
+    response = session.get(
+        "https://ids.hit.edu.cn/authserver/login",
+        params={"service": "http://jw.hitsz.edu.cn/casLogin"},
     )
+    from selectolax.parser import HTMLParser
 
-    username_element = tab.ele("#username")
-    if not isinstance(username_element, ChromiumElement):
-        raise TypeError("`username_element` 不是 `ChromiumElement` 类型。")
-    username_element.focus()
-    username_element.input(username, by_js=True)
+    tree = HTMLParser(response.text)
 
-    passward_element = tab.ele("#password")
-    if not isinstance(passward_element, ChromiumElement):
-        raise TypeError("`passward_element` 不是 `ChromiumElement` 类型。")
-    passward_element.focus()
-    passward_element.input(password, by_js=True)
+    selector = "div#pwdLoginDiv"
+    node = tree.css_first(selector)
+    if node is None:
+        raise ValueError(f"找不到匹配选择器 '{selector}' 的元素")
 
-    submit_element = tab.ele("#login_submit")
-    if not isinstance(submit_element, ChromiumElement):
-        raise TypeError("`submit_element` 不是 `ChromiumElement` 类型。")
-    submit_element.focus()
-    submit_element.click()
+    event_id_selector = "input#_eventId"
+    event_id_node = node.css_first(event_id_selector)
+    if event_id_node is None:
+        raise ValueError(f"找不到匹配选择器 '{event_id_selector}' 的元素")
 
-    tab.wait.load_start()
-    cookies = tab.cookies().as_str()
-    print(Fore.GREEN + "Cookie 已获取。" + Fore.RESET)
-    browser.quit()
-    return cookies
+    cllt_selector = "input#cllt"
+    cllt_node = node.css_first(cllt_selector)
+    if cllt_node is None:
+        raise ValueError(f"找不到匹配选择器 '{cllt_selector}' 的元素")
+
+    dllt_selector = "input#dllt"
+    dllt_node = node.css_first(dllt_selector)
+    if dllt_node is None:
+        raise ValueError(f"找不到匹配选择器 '{dllt_selector}' 的元素")
+
+    lt_selector = "input#lt"
+    lt_node = node.css_first(lt_selector)
+    if lt_node is None:
+        raise ValueError(f"找不到匹配选择器 '{lt_selector}' 的元素")
+
+    salt_selector = "input#pwdEncryptSalt"
+    salt_node = node.css_first(salt_selector)
+    if salt_node is None:
+        raise ValueError(f"找不到匹配选择器 '{salt_selector}' 的元素")
+
+    execution_selector = "input#execution"
+    execution_node = node.css_first(execution_selector)
+    if execution_node is None:
+        raise ValueError(f"找不到匹配选择器 '{execution_selector}' 的元素")
+
+    event_id = event_id_node.attributes["value"]
+    cllt = cllt_node.attributes["value"]
+    dllt = dllt_node.attributes["value"]
+    lt = lt_node.attributes["value"]
+    salt = salt_node.attributes["value"]
+    if salt is None:
+        raise ValueError("元素中没有 'value' 属性的值")
+
+    execution = execution_node.attributes["value"]
+
+    encrypted_password = encrypt_password(password, salt)
+    session.post(
+        "https://ids.hit.edu.cn/authserver/login",
+        params={"service": "http://jw.hitsz.edu.cn/casLogin"},
+        data={
+            "username": username,
+            "password": encrypted_password,
+            "captcha": "",
+            "_eventId": event_id,
+            "cllt": cllt,
+            "dllt": dllt,
+            "lt": lt,
+            "execution": execution,
+        },
+    )
+    cookies = session.cookies.get_dict(domain="jw.hitsz.edu.cn")
+    return f"route={cookies['route']}; JSESSIONID={cookies['JSESSIONID']}"
 
 
 def get_time_info(headers: dict[str, str], retry_count: int = 0) -> dict[str, str]:
@@ -458,8 +539,8 @@ def get_courses(
                 elements: list[dict[str, str]] = response_json["kxrwList"]["list"]
                 courses = []
                 for course in elements:
-                    soup = BeautifulSoup(course["kcxx"], "html.parser")
-                    information = soup.get_text("\n")
+                    tree = HTMLParser(course["kcxx"])
+                    information = tree.text(separator="\n")
                     courses.append(
                         {
                             "id": course["id"],
