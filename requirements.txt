@@ -1,0 +1,6 @@
+colorama>=0.4.6
+flask>=2.3.0
+pycryptodome>=3.23.0
+python-dotenv>=1.0.1
+requests>=2.32.3
+selectolax>=0.3.31

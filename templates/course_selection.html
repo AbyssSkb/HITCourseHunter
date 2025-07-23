@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}选择课程 - HITCourseHunter{% endblock %}
+
+{% block extra_head %}
+<style>
+.category-selector {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.course-grid {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Panel: Categories and Search -->
+    <div class="col-lg-3">
+        <!-- Selection Summary -->
+        <div class="selection-summary">
+            <div class="selection-count">
+                <h6>已选课程: <span class="selected-count">{{ selected_courses|length }}</span></h6>
+            </div>
+            
+            <div class="d-grid gap-2 mb-4">
+                <a href="{{ url_for('selected_courses') }}" class="btn btn-success">
+                    <i class="fas fa-list me-2"></i>查看已选课程
+                </a>
+                <button class="btn btn-outline-danger" onclick="clearAllSelections()" {% if selected_courses|length == 0 %}disabled{% endif %}>
+                    <i class="fas fa-trash me-2"></i>清空选择
+                </button>
+            </div>
+        </div>
+        
+        <!-- Search Box -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" id="course-search" placeholder="搜索课程名称...">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course Categories -->
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-layer-group me-2"></i>课程类别</h6>
+            </div>
+            <div class="card-body category-selector">
+                <div class="d-grid gap-2">
+                    {% for category in categories %}
+                    <button class="btn btn-outline-primary category-btn" 
+                            data-category-code="{{ category.code }}" 
+                            data-category-name="{{ category.name }}">
+                        {{ category.name }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Panel: Course List -->
+    <div class="col-lg-9">
+        <!-- Course Display Area -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 id="category-title">
+                        <i class="fas fa-book me-2"></i>请选择课程类别
+                    </h5>
+                    <small class="text-light" id="category-description">从左侧选择一个课程类别开始浏览</small>
+                </div>
+                <div id="course-stats" class="d-none">
+                    <span class="badge bg-light text-dark">
+                        共 <span id="total-courses">0</span> 门课程
+                    </span>
+                </div>
+            </div>
+            
+            <div class="card-body course-grid">
+                <div id="course-list">
+                    <!-- Welcome Message -->
+                    <div id="welcome-message" class="empty-state">
+                        <i class="fas fa-arrow-left"></i>
+                        <h5>开始选择课程</h5>
+                        <p>请从左侧选择一个课程类别，然后浏览可选的课程。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Course Detail Modal -->
+<div class="modal fade" id="courseDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="courseDetailTitle">课程详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="courseDetailBody">
+                <!-- Course details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="selectCourseBtn">选择课程</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let selectedCourses = {{ selected_courses|tojson }};
+let currentCourses = [];
+let currentCategory = null;
+
+$(document).ready(function() {
+    // Category selection
+    $('.category-btn').click(function() {
+        const categoryCode = $(this).data('category-code');
+        const categoryName = $(this).data('category-name');
+        
+        // Update active state
+        $('.category-btn').removeClass('active');
+        $(this).addClass('active');
+        
+        // Load courses
+        loadCourses(categoryCode, categoryName);
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('course-search');
+    const debouncedSearch = debounce(performSearch, 300);
+    searchInput.addEventListener('input', debouncedSearch);
+    
+    // Update selected count
+    updateSelectedCount(selectedCourses.length);
+});
+
+function loadCourses(categoryCode, categoryName, keyword = '') {
+    currentCategory = { code: categoryCode, name: categoryName };
+    
+    // Update UI
+    $('#category-title').html(`<i class="fas fa-book me-2"></i>${categoryName}`);
+    $('#category-description').text('正在加载课程...');
+    $('#course-stats').addClass('d-none');
+    
+    // Show loading
+    showLoading($('#course-list'));
+    
+    // Build URL
+    let url = `/api/courses/${categoryCode}`;
+    if (keyword) {
+        url += `?keyword=${encodeURIComponent(keyword)}`;
+    }
+    
+    // Load courses
+    apiRequest(url)
+        .then(data => {
+            currentCourses = data.courses;
+            displayCourses(data.courses);
+            
+            // Update stats
+            $('#category-description').text(`找到 ${data.courses.length} 门可选课程`);
+            $('#total-courses').text(data.courses.length);
+            $('#course-stats').removeClass('d-none');
+        })
+        .catch(error => {
+            showError(`加载课程失败: ${error.message}`);
+            $('#course-list').html(`
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                    <h5>加载失败</h5>
+                    <p>${error.message}</p>
+                </div>
+            `);
+        });
+}
+
+function displayCourses(courses) {
+    const courseList = $('#course-list');
+    
+    if (courses.length === 0) {
+        courseList.html(`
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h5>未找到课程</h5>
+                <p>当前类别或搜索条件下没有可选课程。</p>
+            </div>
+        `);
+        return;
+    }
+    
+    const coursesHtml = courses.map(course => {
+        const isSelected = selectedCourses.some(selected => selected.id === course.id);
+        return createCourseCard(course, isSelected);
+    }).join('');
+    
+    courseList.html(coursesHtml);
+    
+    // Bind click events
+    $('.course-card').click(function() {
+        const courseId = $(this).data('course-id');
+        const course = currentCourses.find(c => c.id === courseId);
+        if (course) {
+            showCourseDetail(course);
+        }
+    });
+    
+    // Bind selection events
+    $('.select-course-btn').click(function(e) {
+        e.stopPropagation();
+        const courseId = $(this).data('course-id');
+        const course = currentCourses.find(c => c.id === courseId);
+        if (course) {
+            toggleCourseSelection(course, $(this));
+        }
+    });
+}
+
+function createCourseCard(course, isSelected) {
+    const buttonClass = isSelected ? 'btn-success' : 'btn-outline-primary';
+    const buttonText = isSelected ? '已选择' : '选择';
+    const buttonIcon = isSelected ? 'fas fa-check' : 'fas fa-plus';
+    const cardClass = isSelected ? 'course-card selected' : 'course-card';
+    
+    return `
+        <div class="${cardClass}" data-course-id="${course.id}">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="card-title mb-0">${course.name}</h6>
+                        <button class="btn btn-sm ${buttonClass} select-course-btn" 
+                                data-course-id="${course.id}">
+                            <i class="${buttonIcon}"></i>
+                            ${buttonText}
+                        </button>
+                    </div>
+                    
+                    <div class="course-info">
+                        ${formatCourseInfo(truncateText(course.information, 200))}
+                    </div>
+                    
+                    <div class="course-meta mt-2">
+                        <span><i class="fas fa-tag me-1"></i>课程ID: ${course.id}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function showCourseDetail(course) {
+    $('#courseDetailTitle').text(course.name);
+    $('#courseDetailBody').html(`
+        <div class="row">
+            <div class="col-12">
+                <h6><i class="fas fa-info-circle me-2"></i>课程信息</h6>
+                <div class="course-info mb-4">
+                    ${formatCourseInfo(course.information)}
+                </div>
+                
+                <h6><i class="fas fa-tag me-2"></i>课程详情</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>课程ID：</strong>${course.id}</p>
+                        <p><strong>学年：</strong>${course.academic_year}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>学期：</strong>${course.term}</p>
+                        <p><strong>类别代码：</strong>${course.code}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    const isSelected = selectedCourses.some(selected => selected.id === course.id);
+    const selectBtn = $('#selectCourseBtn');
+    
+    if (isSelected) {
+        selectBtn.removeClass('btn-primary').addClass('btn-success');
+        selectBtn.html('<i class="fas fa-check me-2"></i>已选择');
+    } else {
+        selectBtn.removeClass('btn-success').addClass('btn-primary');
+        selectBtn.html('<i class="fas fa-plus me-2"></i>选择课程');
+    }
+    
+    selectBtn.off('click').on('click', () => {
+        toggleCourseSelection(course, selectBtn);
+        bootstrap.Modal.getInstance(document.getElementById('courseDetailModal')).hide();
+    });
+    
+    new bootstrap.Modal(document.getElementById('courseDetailModal')).show();
+}
+
+function toggleCourseSelection(course, buttonElement) {
+    const isSelected = selectedCourses.some(selected => selected.id === course.id);
+    
+    if (isSelected) {
+        // Remove course
+        removeCourse(course.id)
+            .then(data => {
+                selectedCourses = data.selected_courses;
+                updateSelectedCount(selectedCourses.length);
+                showSuccess(data.message);
+                
+                // Update UI
+                if (currentCourses.length > 0) {
+                    displayCourses(currentCourses);
+                }
+            })
+            .catch(error => {
+                showError(`移除课程失败: ${error.message}`);
+            });
+    } else {
+        // Add course
+        selectCourse(course)
+            .then(data => {
+                selectedCourses = data.selected_courses;
+                updateSelectedCount(selectedCourses.length);
+                showSuccess(data.message);
+                
+                // Update UI
+                if (currentCourses.length > 0) {
+                    displayCourses(currentCourses);
+                }
+            })
+            .catch(error => {
+                showError(`选择课程失败: ${error.message}`);
+            });
+    }
+}
+
+function performSearch() {
+    const keyword = document.getElementById('course-search').value.trim();
+    
+    if (currentCategory) {
+        loadCourses(currentCategory.code, currentCategory.name, keyword);
+    }
+}
+
+function clearAllSelections() {
+    if (confirm('确定要清空所有已选课程吗？此操作无法撤销。')) {
+        // Remove all courses one by one
+        const promises = selectedCourses.map(course => removeCourse(course.id));
+        
+        Promise.all(promises)
+            .then(() => {
+                selectedCourses = [];
+                updateSelectedCount(0);
+                showSuccess('已清空所有选择');
+                
+                // Refresh current view
+                if (currentCourses.length > 0) {
+                    displayCourses(currentCourses);
+                }
+            })
+            .catch(error => {
+                showError(`清空选择失败: ${error.message}`);
+            });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}错误 - HITCourseHunter{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 text-center">
+        <div class="card">
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                
+                <h3 class="mb-3">出现错误</h3>
+                
+                <div class="alert alert-danger">
+                    <i class="fas fa-bug me-2"></i>
+                    {{ message }}
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-home me-2"></i>返回首页
+                    </a>
+                    <button class="btn btn-outline-secondary" onclick="history.back()">
+                        <i class="fas fa-arrow-left me-2"></i>返回上页
+                    </button>
+                </div>
+                
+                <div class="mt-5">
+                    <h6 class="text-muted">可能的解决方案：</h6>
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            检查网络连接是否正常
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            确认用户名和密码是否正确
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            检查是否在选课时间段内
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            尝试重新配置系统设置
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+
+{% block title %}已选课程 - HITCourseHunter{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-list me-3"></i>已选课程</h2>
+                <p class="text-muted mb-0">当前已选择 {{ courses|length }} 门课程</p>
+            </div>
+            <div>
+                <a href="{{ url_for('course_selection') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-plus me-2"></i>继续选课
+                </a>
+                {% if courses|length > 0 %}
+                <button class="btn btn-outline-danger" onclick="clearAllCourses()">
+                    <i class="fas fa-trash me-2"></i>清空所有
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if courses|length > 0 %}
+        <!-- Course Statistics -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-primary">{{ courses|length }}</div>
+                        <div class="text-muted">总课程数</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-success">
+                            {{ courses|groupby('academic_year')|list|length }}
+                        </div>
+                        <div class="text-muted">学年数量</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-info">
+                            {{ courses|groupby('code')|list|length }}
+                        </div>
+                        <div class="text-muted">课程类别</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="text-muted">待抢课</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <button class="btn btn-success w-100" onclick="startHunting()">
+                            <i class="fas fa-play me-2"></i>开始抢课
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-primary w-100" onclick="exportCourses()">
+                            <i class="fas fa-download me-2"></i>导出课程列表
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-secondary w-100" onclick="showHunterInstructions()">
+                            <i class="fas fa-info-circle me-2"></i>抢课说明
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course List -->
+        <div class="row g-4">
+            {% for course in courses %}
+            <div class="col-lg-6">
+                <div class="card course-card" data-course-id="{{ course.id }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="card-title mb-0">{{ course.name }}</h6>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                        type="button" 
+                                        data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="#" onclick="viewCourseDetail('{{ course.id }}')">
+                                            <i class="fas fa-eye me-2"></i>查看详情
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#" onclick="removeCourseFromList('{{ course.id }}')">
+                                            <i class="fas fa-trash me-2"></i>移除课程
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="course-info mb-3">
+                            {{ course.information|replace('\n', '<br>')|safe|truncate(150) }}
+                        </div>
+                        
+                        <div class="course-meta">
+                            <span class="badge bg-primary">{{ course.academic_year }}-{{ course.term }}</span>
+                            <span class="badge bg-secondary">ID: {{ course.id }}</span>
+                            <span class="badge bg-info">代码: {{ course.code }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <i class="fas fa-graduation-cap"></i>
+            <h5>还没有选择任何课程</h5>
+            <p>点击下方按钮开始选择你想要的课程</p>
+            <a href="{{ url_for('course_selection') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-search me-2"></i>开始选课
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Course Detail Modal -->
+<div class="modal fade" id="courseDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="courseDetailTitle">课程详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="courseDetailBody">
+                <!-- Course details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-danger" id="removeCourseBtn">
+                    <i class="fas fa-trash me-2"></i>移除课程
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hunter Instructions Modal -->
+<div class="modal fade" id="hunterInstructionsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-rocket me-2"></i>抢课说明
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>注意：</strong>Web界面仅用于课程选择，实际抢课需要使用命令行工具。
+                </div>
+                
+                <h6><i class="fas fa-terminal me-2"></i>命令行抢课步骤：</h6>
+                <ol>
+                    <li>确保已在"设置"页面中配置了用户名和密码</li>
+                    <li>打开终端/命令提示符</li>
+                    <li>切换到项目目录</li>
+                    <li>运行抢课命令：</li>
+                </ol>
+                
+                <div class="bg-dark text-light p-3 rounded mb-3">
+                    <code>python3 hunter.py</code>
+                </div>
+                
+                <h6><i class="fas fa-clock me-2"></i>定时抢课：</h6>
+                <p>如果你在设置中配置了开始时间，程序会自动等待到指定时间开始抢课。</p>
+                
+                <h6><i class="fas fa-cog me-2"></i>配置选项：</h6>
+                <ul>
+                    <li><strong>START_TIME：</strong>抢课开始时间（格式：HH:MM:SS）</li>
+                    <li><strong>WAIT_TIME：</strong>每次尝试之间的等待时间（秒）</li>
+                </ul>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>提醒：</strong>请遵守学校选课规定，合理使用抢课工具。
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <a href="{{ url_for('config_page') }}" class="btn btn-primary">检查设置</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let courses = {{ courses|tojson }};
+
+function viewCourseDetail(courseId) {
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
+    
+    $('#courseDetailTitle').text(course.name);
+    $('#courseDetailBody').html(`
+        <div class="row">
+            <div class="col-12">
+                <h6><i class="fas fa-info-circle me-2"></i>课程信息</h6>
+                <div class="course-info mb-4">
+                    ${formatCourseInfo(course.information)}
+                </div>
+                
+                <h6><i class="fas fa-tag me-2"></i>课程详情</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>课程ID：</strong>${course.id}</p>
+                        <p><strong>学年：</strong>${course.academic_year}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>学期：</strong>${course.term}</p>
+                        <p><strong>类别代码：</strong>${course.code}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    $('#removeCourseBtn').off('click').on('click', () => {
+        removeCourseFromList(courseId);
+        bootstrap.Modal.getInstance(document.getElementById('courseDetailModal')).hide();
+    });
+    
+    new bootstrap.Modal(document.getElementById('courseDetailModal')).show();
+}
+
+function removeCourseFromList(courseId) {
+    if (confirm('确定要从选课列表中移除这门课程吗？')) {
+        removeCourse(courseId)
+            .then(data => {
+                showSuccess(data.message);
+                // Remove from UI
+                $(`.course-card[data-course-id="${courseId}"]`).remove();
+                courses = courses.filter(c => c.id !== courseId);
+                
+                // Update counts
+                updateSelectedCount(courses.length);
+                
+                // Reload page if no courses left
+                if (courses.length === 0) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                showError(`移除课程失败: ${error.message}`);
+            });
+    }
+}
+
+function clearAllCourses() {
+    if (confirm('确定要清空所有已选课程吗？此操作无法撤销。')) {
+        const promises = courses.map(course => removeCourse(course.id));
+        
+        Promise.all(promises)
+            .then(() => {
+                showSuccess('已清空所有课程');
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            })
+            .catch(error => {
+                showError(`清空课程失败: ${error.message}`);
+            });
+    }
+}
+
+function exportCourses() {
+    const dataStr = JSON.stringify(courses, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'selected_courses.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    showSuccess('课程列表已导出');
+}
+
+function startHunting() {
+    showHunterInstructions();
+}
+
+function showHunterInstructions() {
+    new bootstrap.Modal(document.getElementById('hunterInstructionsModal')).show();
+}
+
+// Update selected count in navigation
+$(document).ready(function() {
+    updateSelectedCount(courses.length);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - HITCourseHunter{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row justify-content-center">
+    <div class="col-lg-8 text-center">
+        <div class="mb-5">
+            <i class="fas fa-graduation-cap text-primary" style="font-size: 4rem;"></i>
+            <h1 class="display-4 mt-3 mb-3">HITCourseHunter</h1>
+            <p class="lead text-muted">HITSZ 智能选课助手 - 让选课变得更简单</p>
+        </div>
+    </div>
+</div>
+
+<!-- Feature Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 text-center">
+            <div class="card-body p-4">
+                <div class="text-primary mb-3">
+                    <i class="fas fa-search" style="font-size: 2.5rem;"></i>
+                </div>
+                <h5 class="card-title">智能搜索</h5>
+                <p class="card-text text-muted">
+                    快速搜索和筛选课程，支持关键词查找，让你轻松找到心仪的课程
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 text-center">
+            <div class="card-body p-4">
+                <div class="text-success mb-3">
+                    <i class="fas fa-clock" style="font-size: 2.5rem;"></i>
+                </div>
+                <h5 class="card-title">定时抢课</h5>
+                <p class="card-text text-muted">
+                    设置开始时间，自动等待并在指定时间开始抢课，不错过任何机会
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 text-center">
+            <div class="card-body p-4">
+                <div class="text-info mb-3">
+                    <i class="fas fa-list-check" style="font-size: 2.5rem;"></i>
+                </div>
+                <h5 class="card-title">批量管理</h5>
+                <p class="card-text text-muted">
+                    一次性选择多门课程，统一管理选课列表，提高选课效率
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-rocket me-2"></i>快速开始</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <a href="{{ url_for('course_selection') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-search me-2"></i>
+                            开始选课
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('selected_courses') }}" class="btn btn-outline-success btn-lg w-100">
+                            <i class="fas fa-list me-2"></i>
+                            查看已选课程
+                        </a>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <a href="{{ url_for('config_page') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-cog me-2"></i>
+                            系统设置
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-info w-100" onclick="showUsageGuide()">
+                            <i class="fas fa-question-circle me-2"></i>
+                            使用说明
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Usage Statistics (if available) -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="display-6" id="selected-count">0</div>
+                        <div class="text-muted">已选课程</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="display-6 text-success">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="text-muted">安全可靠</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="display-6 text-warning">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="text-muted">快速响应</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="display-6 text-info">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="text-muted">易于使用</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Usage Guide Modal -->
+<div class="modal fade" id="usageGuideModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-book me-2"></i>使用说明
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <h6><i class="fas fa-step-forward me-2 text-primary"></i>第一步：配置系统</h6>
+                        <p class="text-muted">在"系统设置"页面中填写你的用户名、密码和其他配置信息。</p>
+                        
+                        <h6 class="mt-4"><i class="fas fa-step-forward me-2 text-primary"></i>第二步：选择课程</h6>
+                        <p class="text-muted">在"选择课程"页面中浏览和搜索课程，将心仪的课程添加到选课列表。</p>
+                        
+                        <h6 class="mt-4"><i class="fas fa-step-forward me-2 text-primary"></i>第三步：开始抢课</h6>
+                        <p class="text-muted">使用命令行工具 <code>python3 hunter.py</code> 开始自动抢课。</p>
+                        
+                        <div class="alert alert-info mt-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>提示：</strong>确保在选课开始前完成所有配置，并提前测试系统的可用性。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <a href="{{ url_for('config_page') }}" class="btn btn-primary">开始配置</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function showUsageGuide() {
+    new bootstrap.Modal(document.getElementById('usageGuideModal')).show();
+}
+
+// Load selected courses count
+$(document).ready(function() {
+    fetch('/api/courses/selected-count')
+        .then(response => response.json())
+        .then(data => {
+            if (data.count !== undefined) {
+                $('#selected-count').text(data.count);
+                updateSelectedCount(data.count);
+            }
+        })
+        .catch(error => {
+            // Fallback: try to get count from selected courses page
+            fetch('/selected')
+                .then(response => response.text())
+                .then(html => {
+                    // This is a simple fallback, in real implementation
+                    // we'd have a proper API endpoint
+                    $('#selected-count').text('N/A');
+                });
+        });
+});
+</script>
+{% endblock %}

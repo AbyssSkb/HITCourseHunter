@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}系统设置 - HITCourseHunter{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cog me-2"></i>系统设置</h5>
+                <small class="text-light">配置你的登录信息和抢课参数</small>
+            </div>
+            <div class="card-body">
+                <form id="configForm">
+                    <!-- Login Credentials -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">
+                                <i class="fas fa-user-circle me-2 text-primary"></i>登录凭据
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user me-1"></i>用户名 *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   name="USERNAME"
+                                   value="{{ config.get('USERNAME', '') }}"
+                                   placeholder="统一身份认证用户名"
+                                   required>
+                            <div class="form-text">你的HITSZ统一身份认证用户名</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>密码 *
+                            </label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="PASSWORD"
+                                       value="{{ config.get('PASSWORD', '') }}"
+                                       placeholder="统一身份认证密码"
+                                       required>
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        onclick="togglePasswordVisibility()">
+                                    <i class="fas fa-eye" id="password-toggle-icon"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">你的HITSZ统一身份认证密码</div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Hunting Parameters -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">
+                                <i class="fas fa-clock me-2 text-success"></i>抢课参数
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="start_time" class="form-label">
+                                <i class="fas fa-clock me-1"></i>开始时间
+                            </label>
+                            <input type="time" 
+                                   class="form-control" 
+                                   id="start_time" 
+                                   name="START_TIME"
+                                   step="1"
+                                   value="{{ config.get('START_TIME', '') }}">
+                            <div class="form-text">可选，设置后程序会等待到指定时间开始抢课</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="wait_time" class="form-label">
+                                <i class="fas fa-stopwatch me-1"></i>等待间隔（秒）
+                            </label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="wait_time" 
+                                   name="WAIT_TIME"
+                                   value="{{ config.get('WAIT_TIME', '3') }}"
+                                   min="1" 
+                                   max="60"
+                                   placeholder="3">
+                            <div class="form-text">每次选课尝试之间的等待时间，建议3-5秒</div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Advanced Settings -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">
+                                <i class="fas fa-cogs me-2 text-info"></i>高级设置
+                            </h6>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="cookies" class="form-label">
+                                <i class="fas fa-cookie-bite me-1"></i>Cookies
+                            </label>
+                            <textarea class="form-control" 
+                                      id="cookies" 
+                                      name="COOKIES"
+                                      rows="3"
+                                      placeholder="留空将自动获取">{{ config.get('COOKIES', '') }}</textarea>
+                            <div class="form-text">通常留空，系统会根据用户名密码自动获取</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetConfig()">
+                                <i class="fas fa-undo me-2"></i>重置
+                            </button>
+                            <button type="button" class="btn btn-outline-info" onclick="testConnection()">
+                                <i class="fas fa-network-wired me-2"></i>测试连接
+                            </button>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>保存设置
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Configuration Status -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle me-2"></i>配置状态</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                {% if config.get('USERNAME') %}
+                                <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                <i class="fas fa-times-circle text-danger"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <strong>用户名</strong><br>
+                                <small class="text-muted">
+                                    {% if config.get('USERNAME') %}已配置{% else %}未配置{% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                {% if config.get('PASSWORD') %}
+                                <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                <i class="fas fa-times-circle text-danger"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <strong>密码</strong><br>
+                                <small class="text-muted">
+                                    {% if config.get('PASSWORD') %}已配置{% else %}未配置{% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                {% if config.get('START_TIME') %}
+                                <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                <i class="fas fa-clock text-warning"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <strong>开始时间</strong><br>
+                                <small class="text-muted">
+                                    {% if config.get('START_TIME') %}{{ config.get('START_TIME') }}{% else %}立即开始{% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-stopwatch text-info"></i>
+                            </div>
+                            <div>
+                                <strong>等待间隔</strong><br>
+                                <small class="text-muted">{{ config.get('WAIT_TIME', '3') }} 秒</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if config.get('USERNAME') and config.get('PASSWORD') %}
+                <div class="alert alert-success mt-3 mb-0">
+                    <i class="fas fa-check-circle me-2"></i>
+                    配置完成！你可以开始选择课程并进行抢课了。
+                </div>
+                {% else %}
+                <div class="alert alert-warning mt-3 mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    请完成基本配置（用户名和密码）才能使用抢课功能。
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Usage Tips -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6><i class="fas fa-lightbulb me-2"></i>使用提示</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">
+                            <i class="fas fa-shield-alt me-2"></i>安全提示
+                        </h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>密码本地加密存储</li>
+                            <li><i class="fas fa-check text-success me-2"></i>自动获取登录凭据</li>
+                            <li><i class="fas fa-check text-success me-2"></i>支持Session保持</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-info">
+                            <i class="fas fa-rocket me-2"></i>使用建议
+                        </h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>测试连接确保配置正确</li>
+                            <li><i class="fas fa-check text-success me-2"></i>设置合理的等待间隔</li>
+                            <li><i class="fas fa-check text-success me-2"></i>提前选择好课程列表</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+$(document).ready(function() {
+    $('#configForm').on('submit', function(e) {
+        e.preventDefault();
+        saveConfiguration();
+    });
+    
+    // Convert time input format
+    const startTimeInput = document.getElementById('start_time');
+    if (startTimeInput.value) {
+        // Convert HH:MM:SS to HH:MM for input[type="time"]
+        startTimeInput.value = startTimeInput.value.substring(0, 5);
+    }
+});
+
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('password-toggle-icon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.className = 'fas fa-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.className = 'fas fa-eye';
+    }
+}
+
+function saveConfiguration() {
+    const formData = new FormData(document.getElementById('configForm'));
+    const config = {};
+    
+    for (let [key, value] of formData.entries()) {
+        if (value.trim()) {
+            // Convert time format for START_TIME
+            if (key === 'START_TIME' && value) {
+                value = value + ':00'; // Add seconds
+            }
+            config[key] = value.trim();
+        }
+    }
+    
+    // Show loading
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>保存中...';
+    submitBtn.disabled = true;
+    
+    apiRequest('/api/config', {
+        method: 'POST',
+        body: JSON.stringify(config)
+    })
+    .then(data => {
+        showSuccess(data.message);
+        // Refresh page to update status
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    })
+    .catch(error => {
+        showError(`保存配置失败: ${error.message}`);
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function resetConfig() {
+    if (confirm('确定要重置所有配置吗？此操作将清空所有设置。')) {
+        document.getElementById('configForm').reset();
+        showInfo('配置已重置，请重新填写并保存');
+    }
+}
+
+function testConnection() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    
+    if (!username || !password) {
+        showError('请先填写用户名和密码');
+        return;
+    }
+    
+    // Create a test configuration
+    const testConfig = {
+        USERNAME: username,
+        PASSWORD: password
+    };
+    
+    // Show loading
+    const testBtn = document.querySelector('button[onclick="testConnection()"]');
+    const originalText = testBtn.innerHTML;
+    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>测试中...';
+    testBtn.disabled = true;
+    
+    // Test connection by trying to save config and get time info
+    apiRequest('/api/config', {
+        method: 'POST',
+        body: JSON.stringify(testConfig)
+    })
+    .then(data => {
+        // If config save succeeds, try to test the connection
+        return fetch('/api/test-connection');
+    })
+    .then(response => {
+        if (response.ok) {
+            showSuccess('连接测试成功！用户名和密码正确。');
+        } else {
+            throw new Error('连接测试失败');
+        }
+    })
+    .catch(error => {
+        showError(`连接测试失败: 请检查用户名和密码是否正确`);
+    })
+    .finally(() => {
+        testBtn.innerHTML = originalText;
+        testBtn.disabled = false;
+    });
+}
+</script>
+{% endblock %}
