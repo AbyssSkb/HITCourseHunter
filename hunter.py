@@ -29,14 +29,17 @@ def run_course_hunter(
         list[dict[str, str]]: 选课失败的课程列表
     """
     unsuccessful_courses: list[dict[str, str]] = []
-    for course in courses:
+    for i, course in enumerate(courses):
         status = add_course(course, headers)
         if not status:
             unsuccessful_courses.append(course)
-        for i in range(wait_time, 0, -1):
-            print(f"\r{Fore.CYAN}等待 {i} 秒后继续...{Fore.RESET}", end="")
-            time.sleep(1)
-        print("\r" + " " * 50 + "\r", end="")  # 清除倒计时行
+        
+        # Only wait if this is not the last course
+        if i < len(courses) - 1:
+            for j in range(wait_time, 0, -1):
+                print(f"\r{Fore.CYAN}等待 {j} 秒后继续...{Fore.RESET}", end="")
+                time.sleep(1)
+            print("\r" + " " * 50 + "\r", end="")  # 清除倒计时行
     return unsuccessful_courses
 
 
@@ -61,7 +64,7 @@ def main() -> None:
         else:
             print(Fore.GREEN + "未设置开始时间，直接开始抢课！" + Fore.RESET)
 
-        while retry_count <= MAX_UNSUCCESSFUL_COURSE_RETRIES:
+        while retry_count < MAX_UNSUCCESSFUL_COURSE_RETRIES:
             unsuccessful_courses = run_course_hunter(courses, headers, wait_time)
 
             if not unsuccessful_courses:
