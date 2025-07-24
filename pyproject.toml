@@ -10,6 +10,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "requests>=2.32.3",
     "selectolax>=0.3.31",
+    "typer>=0.16.0",
 ]
 
 [dependency-groups]
