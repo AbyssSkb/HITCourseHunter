@@ -1,14 +1,18 @@
 import time
+
 import colorama
+import typer
 from colorama import Fore
+from typing_extensions import Annotated
+
 from tools import (
     MaxRetriesExceededError,
     add_course,
-    wait_until_start,
-    load_courses,
-    load_config,
     get_headers,
+    load_config,
+    load_courses,
     save_results,
+    wait_until_start,
 )
 
 colorama.init()  # 初始化 colorama
@@ -40,8 +44,23 @@ def run_course_hunter(
     return unsuccessful_courses
 
 
-def main() -> None:
-    """主函数：程序入口"""
+def main(
+    is_immediate_start: Annotated[
+        bool, typer.Option("--now", "-n", help="跳过等待开始时间，立即开始抢课")
+    ] = False,
+    wait_time: Annotated[
+        int,
+        typer.Option(
+            help="课程抢课间隔时间（秒），优先级高于配置文件", show_default=False
+        ),
+    ] = -1,
+) -> None:
+    """选课抢课工具：自动帮助您在选课系统中抢课
+
+    根据配置文件设置运行课程抢课流程。程序将加载您的课程列表，
+    并在指定时间（如有设置）开始尝试选课。对于选课失败的课程，
+    将自动重试直到达到最大重试次数。
+    """
     config = None
     headers = None
     unsuccessful_courses = []
@@ -52,10 +71,11 @@ def main() -> None:
         courses = load_courses()
         config = load_config()
         headers = get_headers(config["COOKIES"])
-        wait_time = int(config.get("WAIT_TIME", 3))
+        if wait_time == -1:
+            wait_time = int(config.get("WAIT_TIME", 3))
 
         start_time = config.get("START_TIME")
-        if start_time:
+        if start_time and not is_immediate_start:
             print(Fore.CYAN + f"计划开始时间: {start_time}" + Fore.RESET)
             wait_until_start(start_time)
         else:
@@ -85,4 +105,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)
