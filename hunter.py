@@ -79,7 +79,7 @@ def main(
             print(Fore.CYAN + f"计划开始时间: {start_time}" + Fore.RESET)
             wait_until_start(start_time)
         else:
-            print(Fore.GREEN + "未设置开始时间，直接开始抢课！" + Fore.RESET)
+            print(Fore.GREEN + "直接开始抢课" + Fore.RESET)
 
         while retry_count <= MAX_UNSUCCESSFUL_COURSE_RETRIES:
             unsuccessful_courses = run_course_hunter(courses, headers, wait_time)
