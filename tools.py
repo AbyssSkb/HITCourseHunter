@@ -98,6 +98,21 @@ def load_existing_courses() -> list[dict[str, str]]:
     return []
 
 
+def validate_course_data(course: dict[str, str]) -> bool:
+    """验证课程数据结构的完整性
+
+    检查课程字典是否包含所有必需的字段。
+
+    Args:
+        course (dict[str, str]): 要验证的课程数据字典
+
+    Returns:
+        bool: 数据有效返回 True，否则返回 False
+    """
+    required_fields = ["id", "name", "information", "code", "academic_year", "term"]
+    return all(field in course and course[field] is not None for field in required_fields)
+
+
 def display_categories(categories: list[dict[str, str]]) -> None:
     """显示可选课程类别列表
 
@@ -201,7 +216,7 @@ def load_courses() -> list[dict[str, str]]:
 
     Raises:
         FileNotFoundError: 当 courses.json 文件不存在时抛出
-        ValueError: 当没有待选课程时抛出
+        ValueError: 当没有待选课程或课程数据不完整时抛出
     """
     try:
         with open("courses.json", "r") as f:
@@ -209,6 +224,12 @@ def load_courses() -> list[dict[str, str]]:
 
         if len(courses) == 0:
             raise ValueError("没有要抢的课程")
+        
+        # Validate each course data structure
+        invalid_courses = [i for i, course in enumerate(courses) if not validate_course_data(course)]
+        if invalid_courses:
+            raise ValueError(f"课程数据不完整，索引 {invalid_courses} 的课程缺少必需字段")
+        
         return courses
     except FileNotFoundError:
         raise FileNotFoundError("找不到文件 courses.json。请先运行 prepare.py。")
@@ -288,7 +309,9 @@ def wait_until_start(start_time: str) -> None:
             end="",
             flush=True,
         )
-        time.sleep(0.1)
+        # Use adaptive sleep - sleep longer when there's more time remaining
+        sleep_time = min(1.0, max(0.1, remaining / 60))
+        time.sleep(sleep_time)
 
     print("\r" + " " * 50 + "\r", end="")  # 清除倒计时行
     print(Fore.GREEN + "开始抢课！" + Fore.RESET)
@@ -302,77 +325,76 @@ def get_cookies() -> str:
         print(Fore.RED + "请在 .env 文件中填写用户名和密码。" + Fore.RESET)
         sys.exit(1)
 
-    session = requests.Session()
-    response = session.get(
-        "https://ids.hit.edu.cn/authserver/login",
-        params={"service": "http://jw.hitsz.edu.cn/casLogin"},
-    )
-    from selectolax.parser import HTMLParser
+    with requests.Session() as session:
+        response = session.get(
+            "https://ids.hit.edu.cn/authserver/login",
+            params={"service": "http://jw.hitsz.edu.cn/casLogin"},
+        )
 
-    tree = HTMLParser(response.text)
+        tree = HTMLParser(response.text)
 
-    selector = "div#pwdLoginDiv"
-    node = tree.css_first(selector)
-    if node is None:
-        raise ValueError(f"找不到匹配选择器 '{selector}' 的元素")
+        selector = "div#pwdLoginDiv"
+        node = tree.css_first(selector)
+        if node is None:
+            raise ValueError(f"找不到匹配选择器 '{selector}' 的元素")
 
-    event_id_selector = "input#_eventId"
-    event_id_node = node.css_first(event_id_selector)
-    if event_id_node is None:
-        raise ValueError(f"找不到匹配选择器 '{event_id_selector}' 的元素")
+        event_id_selector = "input#_eventId"
+        event_id_node = node.css_first(event_id_selector)
+        if event_id_node is None:
+            raise ValueError(f"找不到匹配选择器 '{event_id_selector}' 的元素")
 
-    cllt_selector = "input#cllt"
-    cllt_node = node.css_first(cllt_selector)
-    if cllt_node is None:
-        raise ValueError(f"找不到匹配选择器 '{cllt_selector}' 的元素")
+        cllt_selector = "input#cllt"
+        cllt_node = node.css_first(cllt_selector)
+        if cllt_node is None:
+            raise ValueError(f"找不到匹配选择器 '{cllt_selector}' 的元素")
 
-    dllt_selector = "input#dllt"
-    dllt_node = node.css_first(dllt_selector)
-    if dllt_node is None:
-        raise ValueError(f"找不到匹配选择器 '{dllt_selector}' 的元素")
+        dllt_selector = "input#dllt"
+        dllt_node = node.css_first(dllt_selector)
+        if dllt_node is None:
+            raise ValueError(f"找不到匹配选择器 '{dllt_selector}' 的元素")
 
-    lt_selector = "input#lt"
-    lt_node = node.css_first(lt_selector)
-    if lt_node is None:
-        raise ValueError(f"找不到匹配选择器 '{lt_selector}' 的元素")
+        lt_selector = "input#lt"
+        lt_node = node.css_first(lt_selector)
+        if lt_node is None:
+            raise ValueError(f"找不到匹配选择器 '{lt_selector}' 的元素")
 
-    salt_selector = "input#pwdEncryptSalt"
-    salt_node = node.css_first(salt_selector)
-    if salt_node is None:
-        raise ValueError(f"找不到匹配选择器 '{salt_selector}' 的元素")
+        salt_selector = "input#pwdEncryptSalt"
+        salt_node = node.css_first(salt_selector)
+        if salt_node is None:
+            raise ValueError(f"找不到匹配选择器 '{salt_selector}' 的元素")
 
-    execution_selector = "input#execution"
-    execution_node = node.css_first(execution_selector)
-    if execution_node is None:
-        raise ValueError(f"找不到匹配选择器 '{execution_selector}' 的元素")
+        execution_selector = "input#execution"
+        execution_node = node.css_first(execution_selector)
+        if execution_node is None:
+            raise ValueError(f"找不到匹配选择器 '{execution_selector}' 的元素")
 
-    event_id = event_id_node.attributes["value"]
-    cllt = cllt_node.attributes["value"]
-    dllt = dllt_node.attributes["value"]
-    lt = lt_node.attributes["value"]
-    salt = salt_node.attributes["value"]
-    if salt is None:
-        raise ValueError("元素中没有 'value' 属性的值")
+        event_id = event_id_node.attributes["value"]
+        cllt = cllt_node.attributes["value"]
+        dllt = dllt_node.attributes["value"]
+        lt = lt_node.attributes["value"]
+        salt = salt_node.attributes["value"]
+        if salt is None:
+            raise ValueError("元素中没有 'value' 属性的值")
 
-    execution = execution_node.attributes["value"]
+        execution = execution_node.attributes["value"]
 
-    encrypted_password = encrypt_password(password, salt)
-    session.post(
-        "https://ids.hit.edu.cn/authserver/login",
-        params={"service": "http://jw.hitsz.edu.cn/casLogin"},
-        data={
-            "username": username,
-            "password": encrypted_password,
-            "captcha": "",
-            "_eventId": event_id,
-            "cllt": cllt,
-            "dllt": dllt,
-            "lt": lt,
-            "execution": execution,
-        },
-    )
-    cookies = session.cookies.get_dict(domain="jw.hitsz.edu.cn")
-    return f"route={cookies['route']}; JSESSIONID={cookies['JSESSIONID']}"
+        encrypted_password = encrypt_password(password, salt)
+        session.post(
+            "https://ids.hit.edu.cn/authserver/login",
+            params={"service": "http://jw.hitsz.edu.cn/casLogin"},
+            data={
+                "username": username,
+                "password": encrypted_password,
+                "captcha": "",
+                "_eventId": event_id,
+                "cllt": cllt,
+                "dllt": dllt,
+                "lt": lt,
+                "execution": execution,
+            },
+        )
+        cookies = session.cookies.get_dict(domain="jw.hitsz.edu.cn")
+        return f"route={cookies['route']}; JSESSIONID={cookies['JSESSIONID']}"
 
 
 def get_time_info(headers: dict[str, str], retry_count: int = 0) -> dict[str, str]:
@@ -580,7 +602,11 @@ def add_course(
 
     Raises:
         MaxRetriesExceededError: 当重试次数超过最大限制时抛出
+        ValueError: 当课程数据不完整时抛出
     """
+    if not validate_course_data(course):
+        raise ValueError("课程数据不完整，缺少必需字段")
+    
     name = course["name"]
     information = course["information"]
     print(Fore.CYAN + f"\n正在添加课程：{name}\n{information}" + Fore.RESET)
@@ -609,7 +635,7 @@ def add_course(
                 raise MaxRetriesExceededError(MAX_RETRIES)
 
             headers["Cookie"] = get_cookies()
-            return add_course(course, headers)
+            return add_course(course, headers, retry_count + 1)
         else:
             print(Fore.RED + "响应内容不是有效的 JSON 格式" + Fore.RESET)
     else:
